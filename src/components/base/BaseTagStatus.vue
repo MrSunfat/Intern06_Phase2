@@ -1,7 +1,15 @@
 <template>
-  <div class="tag-status d-f" :class="type">
+  <div
+    class="tag-status d-f"
+    :class="{ bg: dot === 'hide', 'no-bg': dot !== 'hide', [type]: type }"
+  >
     <div class="dot" :class="dot"></div>
-    <h1 class="tag-status__content mg-l-9 font-14">{{ this.content }}</h1>
+    <h1
+      class="tag-status__content font-14"
+      :class="{ 'mg-l-9': this.dot === 'show' }"
+    >
+      {{ this.content }}
+    </h1>
   </div>
 </template>
 
@@ -30,12 +38,24 @@ export default {
   border-radius: 25px;
 }
 
+.tag-status.bolder-text .tag-status__content {
+  font-family: Open Sans Bold;
+}
+
+.tag-status.bg {
+  background-color: var(--tag-bg);
+}
+
+.tag-status.no-bg {
+  background-color: transparent !important;
+}
+
 .tag-status.on {
   background-color: var(--tag-bg);
 }
 
 .tag-status.off {
-  background-color: transparent;
+  background-color: rgb(255, 236, 230);
 }
 
 .tag-status .dot {
@@ -53,7 +73,11 @@ export default {
   display: none;
 }
 
-.tag-status__content {
+.tag-status.on .tag-status__content {
   color: var(--tag-color);
+}
+
+.tag-status.off .tag-status__content {
+  color: rgb(246, 60, 60);
 }
 </style>

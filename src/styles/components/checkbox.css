@@ -15,3 +15,7 @@
 .dx-checkbox.dx-state-hover .dx-checkbox-icon {
     border-color: var(--primary) !important;
 }
+
+.dx-checkbox-text {
+    padding-left: 12px !important;
+}

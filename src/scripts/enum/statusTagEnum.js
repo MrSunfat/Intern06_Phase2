@@ -1,7 +1,9 @@
 const statusTagEnum = {
     Content: {
         Work: 'Đang hoạt động',
-        Rest: 'Đang nghỉ',
+        InActive: 'Chưa kích hoạt',
+        Active: 'Đang kích hoạt',
+        Use: 'Đang sử dụng',
     },
     Dot: {
         Show: 'show',

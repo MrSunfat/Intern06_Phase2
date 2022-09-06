@@ -22,6 +22,9 @@
     --tag-bg: rgb(232, 248, 236);
     --detail-row-border-color: rgb(224, 229, 230);
     --popup-footer-bg: #f2f2f2;
+    --delete-icon-color: #de1e1e; 
+    --warn-text-color: #ff6333;
+    --warn-bg: #f90;
     /* --sidebar-item-active-bg: #000; */
     /* Kích thước */
     --height-header: 56px;
@@ -35,8 +38,10 @@
     --row-height: 48px;
     --footer-height: 56px;
     --detail-user-width: 515px;
+    --detail-user-group-width: 715px;
     /* popup-edit-user-group */
     --height-popup-edit-user-group: 550px;
+    --height-popup-add-member: 600px;
     --header-height-popup-edit-user-group: 58px;
     --footer-height-popup-edit-user-group: 60px;
 

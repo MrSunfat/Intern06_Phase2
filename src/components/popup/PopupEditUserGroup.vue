@@ -11,7 +11,7 @@
       <div class="popup-edit-user-group__main">
         <div class="popup-edit-user-group__main_detail d-f">
           <div class="avatar mg-r-8">
-            <img src="" alt="" class="avatar__img" />
+            <img :src="avatarImg" alt="" class="avatar__img" />
           </div>
           <div class="detail__container">
             <div class="full-name__container font-14 d-f">
@@ -31,10 +31,14 @@
               v-for="userGroup in userGroupData"
               :key="userGroup.UserGroupID"
             >
-              <DxCheckBox :value="false" class="input-checkbox mg-r-16" />
-              <div class="content">
+              <DxCheckBox
+                :value="false"
+                class="input-checkbox mg-r-16"
+                :text="userGroup.UserGroupName"
+              />
+              <!-- <div class="content">
                 {{ userGroup.UserGroupName }}
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -60,6 +64,7 @@
 import BaseButton from "@/components/base/BaseButton.vue";
 import { DxCheckBox } from "devextreme-vue/check-box";
 import { buttomEnum, userGroupData } from "@/scripts/enum";
+import avatarImg from "@/assets/Icons/avatar.png";
 export default {
   name: "PopupEditUserGroup",
   components: {
@@ -70,6 +75,7 @@ export default {
     return {
       buttomEnum,
       userGroupData,
+      avatarImg,
     };
   },
   methods: {
@@ -159,6 +165,8 @@ export default {
   height: var(--footer-height-popup-edit-user-group);
   padding: 0 24px;
   border-top: 1px solid #dadce3;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 /* main */
@@ -186,8 +194,15 @@ export default {
 
 .popup-edit-user-group__main .avatar {
   background-color: #000;
-  width: 16px;
-  height: 16px;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.popup-edit-user-group__main .avatar .avatar__img {
+  width: 100%;
+  height: 100%;
 }
 
 .popup-edit-user-group__main__group .title {

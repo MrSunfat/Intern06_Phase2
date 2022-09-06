@@ -4,8 +4,8 @@
       <div class="icon-title-size"></div>
     </div>
     <div class="detail-preview-user__header mg-b-24 d-f">
-      <div class="header__avatar">
-        <img src="" alt="" class="header__avatar__img" />
+      <div class="header__avatar mg-r-8">
+        <img :src="avatarImg" alt="avatar" class="header__avatar__img" />
       </div>
       <div class="header__detail">
         <h1 class="full-name no-mg font-20 text-default-color">
@@ -18,7 +18,7 @@
           <BaseTagStatus
             :content="statusTagEnum.Content.Work"
             :dot="statusTagEnum.Dot.Show"
-            type="off"
+            type="on"
           />
         </div>
         <BaseButton
@@ -74,6 +74,7 @@
 import { statusTagEnum, buttomEnum } from "@/scripts/enum";
 import BaseTagStatus from "@/components/base/BaseTagStatus.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
+import avatarImg from "@/assets/Icons/avatar.png";
 export default {
   name: "BaseDetailUser",
   components: {
@@ -84,6 +85,7 @@ export default {
     return {
       statusTagEnum,
       buttomEnum,
+      avatarImg,
     };
   },
   methods: {
@@ -142,6 +144,14 @@ export default {
   width: 95px;
   height: 119px;
   /* background: #000; */
+}
+
+.detail-preview-user__header .header__avatar__img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-top: 10px;
 }
 
 .detail-work__title {

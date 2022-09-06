@@ -53,6 +53,7 @@ export default {
       this.isFocus = false;
     },
   },
+  mounted() {},
 };
 </script>
 

@@ -41,6 +41,7 @@
             class="mg-l-8"
             :type="buttomEnum.typeBtn.Icon"
             positionIcon="-264px -144px"
+            @click="handleToggleOption"
           />
         </div>
       </div>
@@ -55,15 +56,41 @@
           :allow-column-resizing="true"
           :show-borders="false"
           :focused-row-enabled="true"
-          @focused-row-changed="handleShowDetailUser"
-          @focused-row-changing="handleShowDetailUser"
+          @row-click="handleShowDetailUser"
         >
-          <DxColumn data-field="FullName" :caption="userInfo.FullName" />
-          <DxColumn data-field="Position" :caption="userInfo.Position" />
-          <DxColumn data-field="Room" :caption="userInfo.Room" />
-          <DxColumn data-field="Office" :caption="userInfo.Office" />
-          <DxColumn data-field="UserGroup" :caption="userInfo.UserGroup" />
-          <DxColumn data-field="StatusWork" :caption="userInfo.StatusWork" />
+          <DxColumn
+            v-for="property in showPropertiesSelected"
+            :key="property.ID"
+            :data-field="property.Field"
+            :caption="property.Name"
+            :cell-template="property.Field === 'Status' && 'cellTemplateStatus'"
+            :alignment="property.Field === 'Status' && 'center'"
+          />
+          <template #cellTemplateStatus="{ data }">
+            <BaseTagStatus
+              class="config-tag-status"
+              :type="data.value.includes('Đang') ? 'on' : 'off'"
+              :content="data.value"
+              :dot="statusTagEnum.Dot.Hide"
+            />
+          </template>
+          <DxColumn
+            data-field="UserID"
+            caption=""
+            :width="50"
+            cell-template="cellTemplateDelete"
+            :allow-reordering="false"
+            :allowResizing="false"
+          />
+          <template #cellTemplateDelete="{ data }">
+            <div
+              class="icon-size custom-column-delete"
+              @click.stop="handleDeleteUser(data.value)"
+            >
+              <div class="icon-title-size"></div>
+            </div>
+          </template>
+          <DxPaging :enabled="false" />
         </DxDataGrid>
       </div>
       <div class="user__footer d-f">
@@ -76,30 +103,48 @@
         @showPopupUserGroup="handleShowPopupEditUserGroup"
       />
     </div>
-    <!-- <BaseOption class="option" /> -->
+    <div
+      class="user__option"
+      tabindex="-1"
+      ref="userOption"
+      v-if="isShowOption"
+    >
+      <BaseOption
+        class="option"
+        @closeOption="handleHideOption"
+        @changePropertiesUser="handleChangePropertiesFollowOption"
+      />
+    </div>
     <PopupEditUserGroup
       v-show="isShowPopupEditUserGroup"
       @hiddenPopupEditUserGroup="handleHidePopupEditUserGroup"
     />
+    <div class="loading" v-show="isLoading">
+      <LoadingComp />
+    </div>
   </div>
 </template>
 
 <script>
-import { sidebarTitles, placholderText, userInfo } from "@/scripts/constants";
+import { sidebarTitles, placholderText } from "@/scripts/constants";
 import {
   userData,
   userGroupData,
   buttomEnum,
   currentRecord,
+  statusTagEnum,
+  userPropertiesEnum,
 } from "@/scripts/enum";
 import DxSelectBox from "devextreme-vue/select-box";
-import { DxDataGrid, DxColumn } from "devextreme-vue/data-grid";
+import { DxDataGrid, DxColumn, DxPaging } from "devextreme-vue/data-grid";
 import BaseInputSearch from "@/components/base/BaseInputSearch.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 import BasePagination from "@/components/base/BasePagination.vue";
-// import BaseOption from "@/components/base/BaseOption.vue";
+import BaseOption from "@/components/base/BaseOption.vue";
 import BaseDetailUser from "@/components/base/BaseDetailUser.vue";
-import PopupEditUserGroup from "@/components/base/PopupEditUserGroup.vue";
+import PopupEditUserGroup from "@/components/popup/PopupEditUserGroup.vue";
+import BaseTagStatus from "@/components/base/BaseTagStatus.vue";
+import LoadingComp from "@/components/Loading/LoadingComp.vue";
 
 export default {
   name: "UserPage",
@@ -107,26 +152,33 @@ export default {
     return {
       sidebarTitles,
       placholderText,
-      userInfo,
       userData,
       userGroupData,
+      userProperties: [],
       buttomEnum,
+      statusTagEnum,
       currentRecord,
       valueSearch: "",
+      // Biến để kiểm tra show/hide các popup và dialog
       isShowDetailUser: false,
       isShowPopupEditUserGroup: false,
+      isShowOption: false,
+      isLoading: false,
     };
   },
   components: {
     DxSelectBox,
     DxDataGrid,
     DxColumn,
+    DxPaging,
     BaseInputSearch,
     BaseButton,
     BasePagination,
-    // BaseOption,
+    BaseOption,
     BaseDetailUser,
     PopupEditUserGroup,
+    BaseTagStatus,
+    LoadingComp,
   },
   methods: {
     /**
@@ -147,8 +199,8 @@ export default {
      * Xử lý khi mở DetailUser
      * Author: TNDanh (27/8/2022)
      */
-    handleShowDetailUser() {
-      console.log("Show Detail User");
+    handleShowDetailUser(user) {
+      console.log("Show Detail User ", user.data.UserID);
       this.isShowDetailUser = true;
     },
     /**
@@ -165,22 +217,77 @@ export default {
     handleHidePopupEditUserGroup() {
       this.isShowPopupEditUserGroup = false;
     },
+    /**
+     * Mở/ Đóng Otion
+     * Author: TNDanh (28/8/2022)
+     */
+    handleToggleOption() {
+      this.isShowOption = !this.isShowOption;
+      this.$nextTick(() => {
+        this.$refs.userOption.focus();
+      });
+    },
+    /**
+     * Đóng popup option
+     * Author: TNDanh (28/8/2022)
+     */
+    handleHideOption() {
+      this.isShowOption = false;
+    },
+    /**
+     * Xử lý khi nhấn nút xóa 1 user
+     * Author: TNDanh (30/8/2022)
+     */
+    handleDeleteUser(userID) {
+      console.log("Xóa - ", userID);
+      // alert(`userID - ${user.data.UserID}`);
+    },
+    /**
+     * Xử lý cơ bản dữ liệu đầu vào của user
+     * Author: TNDanh (31/8/2022)
+     */
+    handleUserData() {
+      this.userData = this.userData.map((user) => {
+        return {
+          ...user,
+          Status:
+            user.Status === 3
+              ? statusTagEnum.Content.Work
+              : statusTagEnum.Content.InActive,
+          OrganizationUnitName: user.OrganizationUnitName
+            ? user.OrganizationUnitName
+            : "-",
+        };
+      });
+    },
+    /**
+     * Nhận các thuộc tính của user
+     * Author: TNDanh (31/8/2022)
+     */
+    receivePropertiesUser() {
+      this.userProperties =
+        JSON.parse(localStorage.getItem("userProperties")) ||
+        userPropertiesEnum;
+    },
+    /**
+     * Xét các thuộc tính của user nhận theo sự thay đổi của tùy chỉnh cột
+     * Author: TNDanh (31/8/2022)
+     */
+    handleChangePropertiesFollowOption(newProperties) {
+      this.userProperties = newProperties;
+    },
+  },
+  computed: {
+    showPropertiesSelected() {
+      return this.userProperties.filter((property) => property.Selected);
+    },
   },
   created() {
-    this.userData = this.userData.map((user) => {
-      if (user.StatusWork) {
-        return {
-          ...user,
-          StatusWork: "Đang hoạt động",
-        };
-      } else {
-        return {
-          ...user,
-          StatusWork: "Đang nghỉ",
-        };
-      }
-    });
+    this.handleUserData();
+    this.receivePropertiesUser();
   },
+  mounted() {},
+  watch: {},
 };
 </script>
 
@@ -189,6 +296,19 @@ export default {
   position: relative;
   padding: 16px 20px;
   height: 100%;
+}
+
+.loading {
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(251, 251, 251, 0.3);
 }
 
 .user__header {
@@ -205,8 +325,6 @@ export default {
 /* header right của user */
 .user__header__right {
   justify-content: space-between;
-}
-.user__header__right .input-search {
 }
 
 .user__main {
@@ -260,5 +378,53 @@ export default {
 .user__detail.hide {
   --hide: calc(var(--detail-user-width) + 100px);
   right: calc(0px - var(--hide));
+}
+
+/* Option user */
+.user__option {
+  position: fixed;
+  top: 118px;
+  right: 0;
+  width: 330px;
+  height: 570px;
+  background: #fff;
+  box-shadow: 0 0 10px 0 rgb(0 0 0 / 10%);
+  border-radius: 8px;
+  /* overflow: hidden; */
+}
+
+.user__option::before {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+
+  border-bottom: 5px solid #000;
+}
+
+/* config tag status */
+.config-tag-status {
+  padding: 0 !important;
+  justify-content: center;
+  width: 150px;
+  margin: 0 auto;
+}
+
+.custom-column-delete {
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-column-delete .icon-title-size {
+  -webkit-mask: url("../../assets/Icons/ic_sprites_2.svg") no-repeat -168px -24px;
+  mask: url("../../assets/Icons/ic_sprites_2.svg") no-repeat -168px -24px;
+  background-color: var(--delete-icon-color);
+}
+
+.dx-datagrid-rowsview .dx-row:hover .custom-column-delete {
+  display: flex;
 }
 </style>

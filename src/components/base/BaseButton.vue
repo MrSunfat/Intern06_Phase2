@@ -153,10 +153,26 @@ export default {
   cursor: not-allowed;
 }
 
+/* warn */
+.warn-btn {
+  border: 1px solid var(--warn-bg);
+  background: transparent;
+  padding: 0 16px;
+}
+
+.warn-btn > .base-btn__text {
+  color: var(--warn-text-color);
+}
+
+.warn-btn:hover > .base-btn__text {
+  color: var(--warn-bg);
+}
+
 /* text btn */
 .text-btn > .base-btn__text {
   color: #1e1f1f;
   margin: 0 12px;
+  padding: 0 12px;
 }
 
 .base-btn.text-btn:hover {

@@ -1,0 +1,8 @@
+.dx-dropdownlist-popup-wrapper {
+    width: 150px !important;
+}
+
+.dx-tagbox:not(.dx-tagbox-single-line) .dx-texteditor-input-container {
+    min-height: 36px !important;
+    padding: 0 !important;
+}

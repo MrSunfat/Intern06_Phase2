@@ -1,190 +1,193 @@
 <template>
-  <div id="kanban">
-    <DxScrollView
-      class="scrollable-board"
-      direction="horizontal"
-      show-scrollbar="always"
-    >
-      <DxSortable
-        class="sortable-lists"
-        item-orientation="horizontal"
-        handle=".list-title"
-        @reorder="onListReorder"
-      >
-        <div
-          v-for="(list, listIndex) in lists"
-          :key="statuses[listIndex]"
-          class="list"
-        >
-          <div class="list-title dx-theme-text-color">
-            {{ statuses[listIndex] }}
-          </div>
-          <DxScrollView class="scrollable-list" show-scrollbar="always">
-            <DxSortable
-              :data="list"
-              class="sortable-cards"
-              group="tasksGroup"
-              @drag-start="onTaskDragStart($event)"
-              @reorder="onTaskDrop($event)"
-              @add="onTaskDrop($event)"
-            >
-              <div
-                v-for="task in list"
-                :key="task.Task_ID"
-                class="
-                  card
-                  dx-card dx-theme-text-color dx-theme-background-color
-                "
-              >
-                <div :class="['card-priority', getPriorityClass(task)]" />
-                <div class="card-subject">{{ task.Task_Subject }}</div>
-                <div class="card-assignee">
-                  {{ employeesMap[task.Task_Assigned_Employee_ID] }}
-                </div>
-              </div>
-            </DxSortable>
-          </DxScrollView>
+  <div class="base-option">
+    <div class="base-option__header">
+      <div class="header__top">
+        <h1 class="title no-mg font-18 bold">Tủy chỉnh cột</h1>
+        <div class="icon-size refresh" @click="handleRefreshOption">
+          <div class="icon-title-size"></div>
         </div>
-      </DxSortable>
-    </DxScrollView>
+      </div>
+      <div class="header__bottom">
+        <BaseInputSearch :placeholderText="placholderText.Search" />
+      </div>
+    </div>
+    <div id="base-option__container">
+      <div class="widget-container">
+        <DxList
+          :data-source="userProperties"
+          :repaint-changes-only="true"
+          key-expr="Field"
+        >
+          <template #item="{ data: item }">
+            <DxCheckBox v-model="item.Selected" :text="item.Name" />
+          </template>
+          <DxItemDragging
+            data="item"
+            :allow-reordering="true"
+            :on-drag-start="onDragStart"
+            group="tasks"
+          />
+        </DxList>
+      </div>
+    </div>
+    <div class="base-option__footer">
+      <BaseButton
+        class="save"
+        :type="buttomEnum.typeBtn.Primary"
+        :nameBtn="buttomEnum.nameBtn.Save"
+        @click="handleSaveOption"
+      />
+    </div>
   </div>
 </template>
 <script>
-import { DxScrollView } from "devextreme-vue/scroll-view";
-import { DxSortable } from "devextreme-vue/sortable";
-import { tasks, employees } from "./data.js";
-
-const statuses = [
-  "Not Started",
-  "Need Assistance",
-  "In Progress",
-  "Deferred",
-  "Completed",
-];
+import DxList, { DxItemDragging } from "devextreme-vue/list";
+import { userPropertiesEnum, buttomEnum } from "@/scripts/enum";
+import { placholderText } from "@/scripts/constants";
+import BaseInputSearch from "@/components/base/BaseInputSearch.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
+import { DxCheckBox } from "devextreme-vue/check-box";
 
 export default {
-  name: "BaseOption",
   components: {
-    DxScrollView,
-    DxSortable,
+    DxList,
+    DxItemDragging,
+    BaseInputSearch,
+    BaseButton,
+    DxCheckBox,
   },
   data() {
-    const employeesMap = {};
-
-    employees.forEach((employee) => {
-      employeesMap[employee.ID] = employee.Name;
-    });
-
-    const lists = [];
-
-    statuses.forEach((status) => {
-      lists.push(tasks.filter((task) => task.Task_Status === status));
-    });
-
     return {
-      statuses,
-      lists,
-      employeesMap,
+      userProperties: [],
+      buttomEnum,
+      placholderText,
     };
   },
   methods: {
-    onListReorder(e) {
-      const list = this.lists.splice(e.fromIndex, 1)[0];
-      this.lists.splice(e.toIndex, 0, list);
-
-      const status = this.statuses.splice(e.fromIndex, 1)[0];
-      this.statuses.splice(e.toIndex, 0, status);
+    onDragStart(e) {
+      console.log(e);
+      // e.itemData = this[e.fromData][e.fromIndex];
+      console.log(this.userProperties);
     },
-    onTaskDragStart(e) {
-      e.itemData = e.fromData[e.fromIndex];
+    /**
+     * Lưu các thuộc tính của các cột vào localStorage
+     * Author: TNDanh (30/8/2022)
+     */
+    handleSaveOption() {
+      console.log(this.userProperties);
+      localStorage.setItem(
+        "userProperties",
+        JSON.stringify(this.userProperties)
+      );
+      // Gửi sự kiện đóng Option
+      this.$emit("closeOption");
+      // Gửi sự kiện thay đổi thuộc tính của user
+      this.$emit("changePropertiesUser", this.userProperties);
     },
-    onTaskDrop(e) {
-      e.fromData.splice(e.fromIndex, 1);
-      e.toData.splice(e.toIndex, 0, e.itemData);
-    },
-    getPriorityClass(task) {
-      return `priority-${task.Task_Priority}`;
+    /**
+     * Xét lại về các thuộc tính mặc định muốn hiển thị
+     * Author: TNDanh (30/8/2022)
+     */
+    handleRefreshOption() {
+      this.userProperties = userPropertiesEnum;
+      this.handleSaveOption();
     },
   },
+  mounted() {
+    this.userProperties =
+      JSON.parse(localStorage.getItem("userProperties")) || userPropertiesEnum;
+  },
+  watch: {},
 };
 </script>
-<style>
-#kanban {
-  white-space: nowrap;
+<style scoped>
+.base-option {
+  position: relative;
+  height: 100%;
+  padding: 24px 24px 0;
 }
 
-.list {
-  border-radius: 8px;
-  margin: 5px;
-  background-color: rgba(192, 192, 192, 0.4);
-  display: inline-block;
-  vertical-align: top;
-  white-space: normal;
+.base-option::before {
+  position: absolute;
+  content: "";
+  top: -10px;
+  right: 26px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid #fff;
 }
 
-.list-title {
-  font-size: 16px;
-  padding: 10px;
-  padding-left: 30px;
-  margin-bottom: -10px;
-  font-weight: bold;
-  cursor: pointer;
+.base-option__container {
+  width: 100%;
 }
 
-.scrollable-list {
+.widget-container {
+  display: flex;
+  width: 100%;
+}
+
+.widget-container > * {
   height: 400px;
-  width: 260px;
+  width: 50%;
+  padding: 10px;
 }
 
-.sortable-cards {
+.dx-scrollview-content {
   min-height: 380px;
 }
 
-.card {
-  position: relative;
-  background-color: white;
-  box-sizing: border-box;
-  width: 230px;
-  padding: 10px 20px;
-  margin: 10px;
+/* --Base Option-- */
+/* Header */
+.base-option__header {
+  margin-bottom: 8px;
+}
+
+.base-option__header .header__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* margin-top: 24px; */
+  margin-bottom: 12px;
+}
+
+.base-option .refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 
-.card-subject {
-  padding-bottom: 10px;
+.base-option .icon-size.refresh:hover {
+  background-color: var(--icon-bg-hover);
 }
 
-.card-assignee {
-  opacity: 0.6;
+.base-option .icon-title-size {
+  mask: url("../../assets/Icons/ic_sprites.svg") no-repeat -144px -72px;
+  background: #000;
 }
 
-.card-priority {
+/* footer */
+.base-option__footer {
   position: absolute;
-  top: 10px;
-  bottom: 10px;
-  left: 5px;
-  width: 5px;
-  border-radius: 2px;
-  background: #86c285;
+  content: "";
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--footer-height-popup-edit-user-group);
+  background-color: var(--popup-footer-bg);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
-.priority-1 {
-  background: #adadad;
-}
-
-.priority-2 {
-  background: #86c285;
-}
-
-.priority-3 {
-  background: #edc578;
-}
-
-.priority-4 {
-  background: #ef7d59;
-}
-
-.dx-sortable {
-  display: block;
+.base-option__footer .save {
+  justify-content: center;
+  width: 66px;
+  padding: 0 16px;
+  margin-right: 24px;
 }
 </style>
