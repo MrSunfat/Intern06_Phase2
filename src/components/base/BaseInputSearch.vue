@@ -9,6 +9,7 @@
       @input="changeValueText"
       @focus="inputFocus"
       @blur="inputNoFocus"
+      @keyup.enter="handleEnterInput"
     />
   </div>
 </template>
@@ -51,6 +52,13 @@ export default {
      */
     inputNoFocus() {
       this.isFocus = false;
+    },
+    /**
+     * Nhấn enter -> gửi 1 sự kiện
+     * Author: TNDanh (7/9/2022)
+     */
+    handleEnterInput() {
+      this.$emit("enterKey", this.value);
     },
   },
   mounted() {},

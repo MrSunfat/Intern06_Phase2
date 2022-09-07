@@ -60,7 +60,7 @@
           <div class="title-line"></div>
         </router-link>
         <router-link
-          to="/business/setting"
+          to="/business/setting/user"
           class="title-item w-80"
           :class="{ active: this.titleActive === headerTitles.Setting }"
           @click="activeTitle(headerTitles.Setting)"

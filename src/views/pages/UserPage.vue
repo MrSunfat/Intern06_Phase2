@@ -10,8 +10,9 @@
             class="dropbox__container"
             :items="userGroupData"
             display-expr="UserGroupName"
-            value-expr="UserGroupID"
+            value-expr="UserGroupName"
             height="100%"
+            @valueChanged="handleSelectUserGroup"
             :placeholder="placholderText.UserGroup"
             :noDataText="placholderText.UserGroupNoData"
           />
@@ -20,8 +21,9 @@
           <BaseInputSearch
             class="w-305 mg-l-8"
             :placeholderText="placholderText.InputUser"
-            :valueText="this.valueSearch"
+            :valueText="valueSearch"
             @twoWayValue="modelValueSearch"
+            @enterKey="handleEnterKeyWhenSearch"
           />
         </div>
         <div class="btn-add d-f">
@@ -49,7 +51,7 @@
     <div class="user__main">
       <div class="user__content">
         <DxDataGrid
-          :data-source="userData"
+          :data-source="users"
           key-expr="UserID"
           :remote-operations="false"
           :allow-column-reordering="true"
@@ -69,7 +71,7 @@
           <template #cellTemplateStatus="{ data }">
             <BaseTagStatus
               class="config-tag-status"
-              :type="data.value.includes('Đang') ? 'on' : 'off'"
+              :type="data.value?.includes('Đang') ? 'on' : 'off'"
               :content="data.value"
               :dot="statusTagEnum.Dot.Hide"
             />
@@ -94,7 +96,16 @@
         </DxDataGrid>
       </div>
       <div class="user__footer d-f">
-        <BasePagination />
+        <BasePagination
+          :pageNumber="this.pageDetail.pageNumber"
+          :totalPage="totalPage"
+          :totalRecord="totalUsers"
+          :recordStart="userStart"
+          :recordEnd="userEnd"
+          @pageSize="handleChangePageSize"
+          @prevPage="handleLoadDataInPage"
+          @nextPage="handleLoadDataInPage"
+        />
       </div>
     </div>
     <div class="user__detail" :class="{ hide: !this.isShowDetailUser }">
@@ -126,6 +137,7 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import { sidebarTitles, placholderText } from "@/scripts/constants";
 import {
   userData,
@@ -164,6 +176,12 @@ export default {
       isShowPopupEditUserGroup: false,
       isShowOption: false,
       isLoading: false,
+      pageDetail: {
+        pageSize: 50,
+        pageNumber: 1,
+        searchWord: "",
+        userGroupName: "",
+      },
     };
   },
   components: {
@@ -243,24 +261,6 @@ export default {
       // alert(`userID - ${user.data.UserID}`);
     },
     /**
-     * Xử lý cơ bản dữ liệu đầu vào của user
-     * Author: TNDanh (31/8/2022)
-     */
-    handleUserData() {
-      this.userData = this.userData.map((user) => {
-        return {
-          ...user,
-          Status:
-            user.Status === 3
-              ? statusTagEnum.Content.Work
-              : statusTagEnum.Content.InActive,
-          OrganizationUnitName: user.OrganizationUnitName
-            ? user.OrganizationUnitName
-            : "-",
-        };
-      });
-    },
-    /**
      * Nhận các thuộc tính của user
      * Author: TNDanh (31/8/2022)
      */
@@ -276,18 +276,72 @@ export default {
     handleChangePropertiesFollowOption(newProperties) {
       this.userProperties = newProperties;
     },
+    /**
+     * Xét các pageSize khác nhau
+     * Author: TNDanh (7/9/2022)
+     */
+    handleChangePageSize(pageSize) {
+      this.pageDetail.pageSize = pageSize;
+      this.pageDetail.pageNumber = 1;
+      this.handleGetUsers();
+    },
+    /**
+     *  Đi đến/quay về trang cũ
+     *  Author: TNDanh (7/9/2022)
+     */
+    handleLoadDataInPage(idxPage) {
+      this.pageDetail.pageNumber = idxPage;
+      this.handleGetUsers();
+    },
+    /**
+     * Lấy users mới
+     * Author: TNDanh (7/9/2022)
+     */
+    handleGetUsers() {
+      this.isLoading = true;
+      this.$store.dispatch("getUsers", this.pageDetail);
+    },
+    /**
+     * Nhấn enter ở ô tìm kiếm thì lấy users mới
+     * Author: TNDanh (7/9/2022)
+     */
+    handleEnterKeyWhenSearch(searchWord) {
+      this.pageDetail.searchWord = searchWord;
+      this.handleGetUsers();
+    },
+    /**
+     * Chọn userGroup
+     * Author: TNDanh (7/9/2022)
+     */
+    handleSelectUserGroup(userGroup) {
+      console.log(userGroup.value);
+      this.pageDetail.userGroupName = userGroup.value;
+      if (userGroup.value === "Tất cả") {
+        this.pageDetail.userGroupName = "";
+      }
+      this.handleGetUsers();
+    },
   },
   computed: {
     showPropertiesSelected() {
       return this.userProperties.filter((property) => property.Selected);
     },
+    ...mapGetters(["users", "totalUsers", "userStart", "userEnd", "totalPage"]),
   },
   created() {
-    this.handleUserData();
     this.receivePropertiesUser();
+    this.handleGetUsers();
   },
-  mounted() {},
-  watch: {},
+  mounted() {
+    this.userGroupData.unshift({
+      UserGroupName: "Tất cả",
+    });
+  },
+  watch: {
+    users() {
+      this.isLoading = false;
+    },
+  },
 };
 </script>
 

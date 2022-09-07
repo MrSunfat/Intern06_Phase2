@@ -2,7 +2,7 @@
   <div class="pagination d-f">
     <div class="footer__left d-f mg-l-16 font-14">
       Tổng số:&nbsp;
-      <h1 class="no-mg total-record bold font-14">24</h1>
+      <h1 class="no-mg total-record bold font-14">{{ totalRecord }}</h1>
       &nbsp;bản ghi
     </div>
     <div class="footer__right d-f">
@@ -11,10 +11,14 @@
         <DxSelectBox
           class="page-size w-80"
           :items="currentRecord"
+          :value="50"
+          @valueChanged="handleSelectPageSize"
           placeholder="50"
         />
         <span class="current__record d-f font-14">
-          <h1 class="title no-mg font-14 bold">1-24</h1>
+          <h1 class="title no-mg font-14 bold">
+            {{ recordStart }} - {{ recordEnd }}
+          </h1>
           &nbsp;bản ghi
         </span>
       </div>
@@ -41,8 +45,23 @@ import BaseButton from "@/components/base/BaseButton.vue";
 export default {
   name: "BasePagination",
   props: {
+    pageNumber: {
+      type: Number,
+    },
     totalPage: {
       type: Number,
+    },
+    totalRecord: {
+      type: Number,
+      default: 0,
+    },
+    recordStart: {
+      type: Number,
+      default: 1,
+    },
+    recordEnd: {
+      type: Number,
+      default: 1,
     },
   },
   components: {
@@ -53,7 +72,6 @@ export default {
     return {
       buttomEnum,
       currentRecord,
-      idxPage: 1,
     };
   },
   methods: {
@@ -62,9 +80,9 @@ export default {
      * Author: TNDanh (27/8/2022)
      */
     handlePrevPage() {
-      console.log("prev");
-      if (this.idxPage - 1 > 1) {
-        this.$emit("prevPage", this.idxPage - 1);
+      if (this.pageNumber - 1 >= 1) {
+        console.log("prev");
+        this.$emit("prevPage", this.pageNumber - 1);
       } else {
         this.$emit("offPrevPage");
       }
@@ -74,13 +92,19 @@ export default {
      * Author: TNDanh (27/8/2022)
      */
     handlNextPage() {
-      console.log("next");
-
-      if (this.idxPage + 1 <= this.totalPage) {
-        this.$emit("nextPage", this.idxPage + 1);
+      if (this.pageNumber + 1 <= this.totalPage) {
+        console.log("next");
+        this.$emit("nextPage", this.pageNumber + 1);
       } else {
         this.$emit("offNextPage");
       }
+    },
+    /**
+     * Xử lý khi nhấn chọn pageSize
+     * Author: TNDanh (7/9/2022)
+     */
+    handleSelectPageSize(event) {
+      this.$emit("pageSize", event.value);
     },
   },
 };
