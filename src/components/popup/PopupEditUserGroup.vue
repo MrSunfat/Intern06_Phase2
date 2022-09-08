@@ -15,10 +15,10 @@
           </div>
           <div class="detail__container">
             <div class="full-name__container font-14 d-f">
-              <h1 class="full-name no-mg font-14 bold">Nguyễn Gia Anh</h1>
-              &nbsp;(qlhoinghi@tctk.misa.vn)
+              <h1 class="full-name no-mg font-14 bold">{{ user?.FullName }}</h1>
+              &nbsp;({{ user?.Email }})
             </div>
-            <div class="offical font-14">Tổng cục Thống Kê</div>
+            <div class="offical font-14">{{ user?.OrganizationName }}</div>
           </div>
         </div>
         <div class="popup-edit-user-group__main__group">
@@ -28,11 +28,11 @@
           <div class="group__container">
             <div
               class="group__item d-f"
-              v-for="userGroup in userGroupData"
+              v-for="userGroup in userGroupForUser"
               :key="userGroup.UserGroupID"
             >
               <DxCheckBox
-                :value="false"
+                v-model:value="userGroup.Check"
                 class="input-checkbox mg-r-16"
                 :text="userGroup.UserGroupName"
               />
@@ -61,6 +61,7 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import BaseButton from "@/components/base/BaseButton.vue";
 import { DxCheckBox } from "devextreme-vue/check-box";
 import { buttomEnum, userGroupData } from "@/scripts/enum";
@@ -86,6 +87,17 @@ export default {
     handleHidePopupEditUserGroup() {
       this.$emit("hiddenPopupEditUserGroup");
     },
+  },
+  computed: {
+    userGroupForUser() {
+      return this.userGroupData.map((userGroup) => {
+        return {
+          ...userGroup,
+          Check: this.user.UserGroupName?.includes(userGroup.UserGroupName),
+        };
+      });
+    },
+    ...mapGetters(["user"]),
   },
 };
 </script>

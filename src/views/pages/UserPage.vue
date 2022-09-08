@@ -8,7 +8,7 @@
         <div class="dropbox">
           <DxSelectBox
             class="dropbox__container"
-            :items="userGroupData"
+            :items="userGroupsTag"
             display-expr="UserGroupName"
             value-expr="UserGroupName"
             height="100%"
@@ -110,6 +110,7 @@
     </div>
     <div class="user__detail" :class="{ hide: !this.isShowDetailUser }">
       <BaseDetailUser
+        :userDetail="user"
         @hiddenDetailUser="handleHideDetailUser"
         @showPopupUserGroup="handleShowPopupEditUserGroup"
       />
@@ -211,15 +212,18 @@ export default {
      * Author: TNDanh (27/8/2022)
      */
     handleHideDetailUser() {
+      //this.$store.commit("setUserID", "");
       this.isShowDetailUser = false;
     },
     /**
      * Xử lý khi mở DetailUser
      * Author: TNDanh (27/8/2022)
      */
-    handleShowDetailUser(user) {
+    async handleShowDetailUser(user) {
+      await this.$store.dispatch("getUserByID", user.data.UserID);
       console.log("Show Detail User ", user.data.UserID);
       this.isShowDetailUser = true;
+      //this.$store.commit("setUserID", user.data.UserID);
     },
     /**
      * Nhận sự kiện mở popup edit userGroup
@@ -306,6 +310,7 @@ export default {
      * Author: TNDanh (7/9/2022)
      */
     handleEnterKeyWhenSearch(searchWord) {
+      this.pageDetail.pageNumber = 1;
       this.pageDetail.searchWord = searchWord;
       this.handleGetUsers();
     },
@@ -321,21 +326,37 @@ export default {
       }
       this.handleGetUsers();
     },
+    /**
+     * Gọi về các users cần hiển thị và tất cả userGroup
+     * Author: TNDanh (8/9/2022)
+     */
+    async handleInitData() {
+      await this.handleGetUsers();
+      await this.$store.dispatch("getAllUserGroupTag");
+    },
   },
   computed: {
     showPropertiesSelected() {
       return this.userProperties.filter((property) => property.Selected);
     },
-    ...mapGetters(["users", "totalUsers", "userStart", "userEnd", "totalPage"]),
+    ...mapGetters([
+      "users",
+      "totalUsers",
+      "userStart",
+      "userEnd",
+      "totalPage",
+      "user",
+      "userGroupsTag",
+    ]),
   },
   created() {
     this.receivePropertiesUser();
-    this.handleGetUsers();
+    this.handleInitData();
   },
   mounted() {
-    this.userGroupData.unshift({
-      UserGroupName: "Tất cả",
-    });
+    // this.userGroupData.unshift({
+    //   UserGroupName: "Tất cả",
+    // });
   },
   watch: {
     users() {

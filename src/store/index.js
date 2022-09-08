@@ -1,9 +1,11 @@
 import { createStore } from 'vuex';
 import usersModule from './modules/users';
+import userGroupsModule from './modules/userGroups';
 
 const storeData = {
     modules: {
         usersModule,
+        userGroupsModule,
     },
 };
 

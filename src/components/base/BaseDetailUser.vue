@@ -9,10 +9,10 @@
       </div>
       <div class="header__detail">
         <h1 class="full-name no-mg font-20 text-default-color">
-          Nguyễn Gia Anh
+          {{ user?.FullName }}
         </h1>
         <div class="email font-14 text-default-color">
-          qlhoinghi@tctk.misa.vn
+          {{ user?.Email }}
         </div>
         <div class="status-work">
           <BaseTagStatus
@@ -35,42 +35,43 @@
       </div>
       <div class="detail-row d-f font-14">
         <div class="detail-row__title">Chức vụ</div>
-        <div class="detail-row__content">Tổng Cục trưởng</div>
+        <div class="detail-row__content">{{ user?.JobTitleName }}</div>
       </div>
       <div class="detail-row d-f">
         <div class="detail-row__title">Phòng ban</div>
-        <div class="detail-row__content">Tổng Cục trưởng</div>
+        <div class="detail-row__content">{{ user?.OrganizationUnitName }}</div>
       </div>
       <div class="detail-row d-f">
         <div class="detail-row__title">Đơn vị công tác</div>
-        <div class="detail-row__content">Tổng Cục trưởng</div>
+        <div class="detail-row__content">{{ user?.OrganizationName }}</div>
       </div>
       <div class="detail-row d-f">
         <div class="detail-row__title">Số điện thoại</div>
-        <div class="detail-row__content">Tổng Cục trưởng</div>
+        <div class="detail-row__content">{{ user?.Mobile }}</div>
       </div>
       <div class="detail-row d-f">
         <div class="detail-row__title">SĐT cơ quan</div>
-        <div class="detail-row__content">Tổng Cục trưởng</div>
+        <div class="detail-row__content">{{ user?.WorkPhone }}</div>
       </div>
       <div class="detail-work__title semi-bold text-default-color font-16">
         Thuộc nhóm
       </div>
       <div class="detail-usergroup">
         <div class="detail-usergroup__title font-14 bold">Nhóm người dùng</div>
-        <div class="detail-usergroup__item">
-          Cán bộ thuộc đơn vị hành chính (trừ Cục Thu thập)
+        <div
+          class="detail-usergroup__item"
+          v-for="userGroup in listUserGroupName"
+          :key="userGroup"
+        >
+          {{ userGroup }}
         </div>
-        <div class="detail-usergroup__item">
-          Lãnh đạo Tổng cục phê duyệt đề nghị công tác
-        </div>
-        <div class="detail-usergroup__item">Tiếp nhận đề nghị đi công tác</div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import { statusTagEnum, buttomEnum } from "@/scripts/enum";
 import BaseTagStatus from "@/components/base/BaseTagStatus.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
@@ -80,6 +81,11 @@ export default {
   components: {
     BaseTagStatus,
     BaseButton,
+  },
+  props: {
+    userDetail: {
+      type: Object,
+    },
   },
   data() {
     return {
@@ -103,6 +109,12 @@ export default {
     handleShowPopupUserGroup() {
       this.$emit("showPopupUserGroup");
     },
+  },
+  computed: {
+    listUserGroupName() {
+      return this.userDetail.UserGroupName?.split(", ");
+    },
+    ...mapGetters(["user"]),
   },
 };
 </script>
