@@ -1,5 +1,5 @@
 <template>
-  <div class="user">
+  <div class="user loading-of-parent">
     <div class="user__header mg-b-16 d-f">
       <div class="user__header__left">
         <h1 class="font-20 bold user__title">{{ sidebarTitles.User.name }}</h1>
@@ -21,7 +21,7 @@
           <BaseInputSearch
             class="w-305 mg-l-8"
             :placeholderText="placholderText.InputUser"
-            :valueText="valueSearch"
+            :valueText="pageDetail.searchWord"
             @twoWayValue="modelValueSearch"
             @enterKey="handleEnterKeyWhenSearch"
           />
@@ -38,6 +38,7 @@
             :nameBtn="buttomEnum.nameBtn.Export"
             :type="buttomEnum.typeBtn.Primary"
             positionIcon="-46px -48px"
+            @click="handleExportExcelUser"
           />
           <BaseButton
             class="mg-l-8"
@@ -128,8 +129,10 @@
       />
     </div>
     <PopupEditUserGroup
-      v-show="isShowPopupEditUserGroup"
+      v-if="isShowPopupEditUserGroup"
+      :userGroupsTagW="userGroupsTagW"
       @hiddenPopupEditUserGroup="handleHidePopupEditUserGroup"
+      @saveUserGroupInUser="handleSaveUserGroup"
     />
     <div class="loading" v-show="isLoading">
       <LoadingComp />
@@ -138,6 +141,7 @@
 </template>
 
 <script>
+import axios from "axios";
 import { mapGetters } from "vuex";
 import { sidebarTitles, placholderText } from "@/scripts/constants";
 import {
@@ -148,6 +152,7 @@ import {
   statusTagEnum,
   userPropertiesEnum,
 } from "@/scripts/enum";
+import { domain, user } from "@/scripts/constants";
 import DxSelectBox from "devextreme-vue/select-box";
 import { DxDataGrid, DxColumn, DxPaging } from "devextreme-vue/data-grid";
 import BaseInputSearch from "@/components/base/BaseInputSearch.vue";
@@ -171,7 +176,6 @@ export default {
       buttomEnum,
       statusTagEnum,
       currentRecord,
-      valueSearch: "",
       // Biến để kiểm tra show/hide các popup và dialog
       isShowDetailUser: false,
       isShowPopupEditUserGroup: false,
@@ -205,7 +209,7 @@ export default {
      * Author: TNDanh (27/8/2022)
      */
     modelValueSearch(value) {
-      this.valueSearch = value;
+      this.pageDetail.searchWord = value;
     },
     /**
      * Xử lý khi nhận sự kiện đóng DetailUser
@@ -260,8 +264,10 @@ export default {
      * Xử lý khi nhấn nút xóa 1 user
      * Author: TNDanh (30/8/2022)
      */
-    handleDeleteUser(userID) {
+    async handleDeleteUser(userID) {
       console.log("Xóa - ", userID);
+      await this.$store.dispatch("deleteUserByID", userID);
+      this.handleGetUsers();
       // alert(`userID - ${user.data.UserID}`);
     },
     /**
@@ -309,9 +315,8 @@ export default {
      * Nhấn enter ở ô tìm kiếm thì lấy users mới
      * Author: TNDanh (7/9/2022)
      */
-    handleEnterKeyWhenSearch(searchWord) {
+    handleEnterKeyWhenSearch() {
       this.pageDetail.pageNumber = 1;
-      this.pageDetail.searchWord = searchWord;
       this.handleGetUsers();
     },
     /**
@@ -319,7 +324,6 @@ export default {
      * Author: TNDanh (7/9/2022)
      */
     handleSelectUserGroup(userGroup) {
-      console.log(userGroup.value);
       this.pageDetail.userGroupName = userGroup.value;
       if (userGroup.value === "Tất cả") {
         this.pageDetail.userGroupName = "";
@@ -331,13 +335,53 @@ export default {
      * Author: TNDanh (8/9/2022)
      */
     async handleInitData() {
-      await this.handleGetUsers();
+      this.isLoading = true;
       await this.$store.dispatch("getAllUserGroupTag");
+      await this.handleGetUsers();
+    },
+    /**
+     * Lưu nhóm người dùng
+     * Author: TNDanh (9/9/2022)
+     */
+    async handleSaveUserGroup(userGroups) {
+      // console.log("Lưu nhóm ngdunf", {
+      //   userID: this.user.UserID,
+      //   userGroups,
+      // });
+      this.isLoading = true;
+      this.isShowPopupEditUserGroup = false;
+      this.handleHideDetailUser();
+      await this.$store.dispatch("editUserGroupInGroup", {
+        userID: this.user.UserID,
+        userGroups,
+      });
+      await this.handleGetUsers();
+      //await this.$store.dispatch("getAllUserGroupTag");
+      //this.isLoading = false;
+    },
+    /**
+     * Xử lý xuất khẩu
+     * Author: TNDanh (13/9/2022)
+     */
+    handleExportExcelUser() {
+      axios({
+        url: `${domain}/${user}/Export`,
+        method: "GET",
+        responseType: "blob",
+      }).then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "Danh sách người dùng.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
     },
   },
   computed: {
     showPropertiesSelected() {
-      return this.userProperties.filter((property) => property.Selected);
+      return this.userProperties.filter((property) => property?.Selected);
     },
     ...mapGetters([
       "users",
@@ -347,6 +391,8 @@ export default {
       "totalPage",
       "user",
       "userGroupsTag",
+      "userGroupsTagW",
+      "userDetailForUserGroup",
     ]),
   },
   created() {
@@ -368,22 +414,9 @@ export default {
 
 <style scoped>
 .user {
-  position: relative;
+  /* position: relative; */
   padding: 16px 20px;
   height: 100%;
-}
-
-.loading {
-  position: absolute;
-  content: "";
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(251, 251, 251, 0.3);
 }
 
 .user__header {

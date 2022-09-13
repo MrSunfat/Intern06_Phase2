@@ -16,9 +16,13 @@
         </div>
         <div class="status-work">
           <BaseTagStatus
-            :content="statusTagEnum.Content.Work"
+            :content="
+              user?.Status === 3
+                ? statusTagEnum.Content.Work
+                : statusTagEnum.Content.InActive
+            "
             :dot="statusTagEnum.Dot.Show"
-            type="on"
+            :type="user?.Status === 3 ? 'on' : 'off'"
           />
         </div>
         <BaseButton
@@ -190,6 +194,11 @@ export default {
   align-items: center;
   border-bottom: 1px solid var(--detail-row-border-color);
   width: 284px;
+}
+
+.detail-usergroup {
+  height: 195px;
+  overflow: auto;
 }
 
 .detail-usergroup__title,

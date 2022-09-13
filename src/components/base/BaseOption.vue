@@ -24,7 +24,7 @@
           <DxItemDragging
             data="item"
             :allow-reordering="true"
-            :on-drag-start="onDragStart"
+            :on-drag-end="onDragEnd"
             group="tasks"
           />
         </DxList>
@@ -64,10 +64,20 @@ export default {
     };
   },
   methods: {
-    onDragStart(e) {
-      console.log(e);
-      // e.itemData = this[e.fromData][e.fromIndex];
-      console.log(this.userProperties);
+    /**
+     * Xử lý khi kéo đến vị trí khác và hạ xuống
+     * Author: TNDanh (13/9/2022)
+     */
+    onDragEnd(e) {
+      let fromIndex = e.fromIndex;
+      let toIndex = e.toIndex;
+      if (e.fromIndex <= e.toIndex) {
+        toIndex += 1;
+      } else {
+        fromIndex += 1;
+      }
+      this.userProperties.splice(toIndex, 0, this.userProperties[e.fromIndex]);
+      this.userProperties.splice(fromIndex, 1);
     },
     /**
      * Lưu các thuộc tính của các cột vào localStorage
@@ -93,7 +103,7 @@ export default {
       this.handleSaveOption();
     },
   },
-  mounted() {
+  created() {
     this.userProperties =
       JSON.parse(localStorage.getItem("userProperties")) || userPropertiesEnum;
   },

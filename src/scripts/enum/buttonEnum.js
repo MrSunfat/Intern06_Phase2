@@ -8,6 +8,8 @@ const nameBtn = {
     Cancel: 'Hủy bỏ',
     Save: 'Lưu',
     Agree: 'Đồng ý',
+    No: 'Không',
+    YesAndRemove: 'Có, loại bỏ',
 };
 
 const typeBtn = {

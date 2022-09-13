@@ -13,7 +13,24 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
+.loading-of-parent {
+  position: relative;
+}
+
+.loading {
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(251, 251, 251, 0.3);
+}
+
 .lds-ring {
   display: inline-block;
   position: relative;

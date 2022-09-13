@@ -80,4 +80,8 @@ export default {
 .tag-status.off .tag-status__content {
   color: rgb(246, 60, 60);
 }
+
+.off .dot {
+  background-color: rgb(246, 60, 60);
+}
 </style>

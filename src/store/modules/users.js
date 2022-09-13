@@ -6,6 +6,10 @@ const usersModule = {
     state: {
         users: [],
         user: {},
+        userDetailForUserGroup: {
+            UserID: '',
+            UserGroups: [],
+        },
         userGroupsTag: [],
         totalUsers: 0,
         totalPage: 0,
@@ -15,15 +19,13 @@ const usersModule = {
     },
     getters: {
         users(state) {
-            return state.users.map((user) => {
-                return {
-                    ...user,
-                    Status:
-                        user.Status === 3
-                            ? statusTagEnum.Content.Work
-                            : statusTagEnum.Content.InActive,
-                };
-            });
+            return state.users.map((user) => ({
+                ...user,
+                Status:
+                    user.Status === 3
+                        ? statusTagEnum.Content.Work
+                        : statusTagEnum.Content.InActive,
+            }));
         },
         totalUsers(state) {
             return state.totalUsers;
@@ -51,6 +53,12 @@ const usersModule = {
                 ...state.userGroupsTag,
             ];
         },
+        userGroupsTagW(state) {
+            return state.userGroupsTag;
+        },
+        userDetailForUserGroup(state) {
+            return state.userDetailForUserGroup;
+        },
     },
     actions: {
         /**
@@ -67,6 +75,8 @@ const usersModule = {
                         pageNumber: pageDetail.pageNumber,
                         searchWord: pageDetail?.searchWord,
                         userGroupName: pageDetail?.userGroupName,
+                        jobTitle: pageDetail?.jobTitle,
+                        organizationName: pageDetail?.organizationName,
                     },
                 });
 
@@ -89,7 +99,7 @@ const usersModule = {
         async getUserByID({ commit }, userID) {
             try {
                 const res = await axios.get(`${domain}/${user}/${userID}`);
-                console.log(res);
+                // console.log(res);
                 commit('setUser', res.data);
                 return res;
             } catch (error) {
@@ -106,6 +116,46 @@ const usersModule = {
             try {
                 const res = await axios.get(`${domain}/${userGroup}`);
                 commit('setUserGroupsTag', res.data);
+                return res;
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        /**
+         * Xóa dữ liệu người dùng qua id
+         * @param {*} param0
+         * @param {*} userID
+         * @returns
+         * Author: TNDanh (9/9/2022)
+         */
+        async deleteUserByID({ commit }, userID) {
+            try {
+                const res = await axios.delete(`${domain}/${user}/${userID}`);
+                commit('');
+                return res;
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        /**
+         * Sửa đổi thuộc tính nhóm người dùng của user
+         * @param {*} param0
+         * @param {*} userDetail
+         * @returns
+         * Author: TNDanh (11/9/2022)
+         */
+        async editUserGroupInGroup({ commit }, userDetail) {
+            try {
+                const res = await axios.post(
+                    `${domain}/${user}/EditUserGroupOfUser/${userDetail?.userID}`,
+                    userDetail?.userGroups,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json; charset=utf-8',
+                        },
+                    }
+                );
+                commit('');
                 return res;
             } catch (error) {
                 console.log(error);
@@ -172,6 +222,15 @@ const usersModule = {
          */
         setUserGroupsTag(state, userGroupsTag) {
             state.userGroupsTag = userGroupsTag;
+        },
+        /**
+         * Xét giá trị cho userDetailForUserGroup
+         * @param {*} state
+         * @param {*} userDetailForUserGroup
+         * Author: TNDanh (9/9/2022)
+         */
+        setUserDetailForUserGroup(state, userDetailForUserGroup) {
+            state.userDetailForUserGroup = userDetailForUserGroup;
         },
     },
 };

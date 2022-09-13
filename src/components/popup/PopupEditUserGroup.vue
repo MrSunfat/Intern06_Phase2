@@ -16,7 +16,8 @@
           <div class="detail__container">
             <div class="full-name__container font-14 d-f">
               <h1 class="full-name no-mg font-14 bold">{{ user?.FullName }}</h1>
-              &nbsp;({{ user?.Email }})
+              &nbsp;
+              <span v-show="user?.Email">({{ user?.Email }})</span>
             </div>
             <div class="offical font-14">{{ user?.OrganizationName }}</div>
           </div>
@@ -28,7 +29,7 @@
           <div class="group__container">
             <div
               class="group__item d-f"
-              v-for="userGroup in userGroupForUser"
+              v-for="userGroup in userGroupData"
               :key="userGroup.UserGroupID"
             >
               <DxCheckBox
@@ -54,6 +55,7 @@
           class="mg-r-12"
           :nameBtn="buttomEnum.nameBtn.Save"
           :type="buttomEnum.typeBtn.Primary"
+          @click="handleSaveUserGroup"
         />
       </div>
     </div>
@@ -64,7 +66,7 @@
 import { mapGetters } from "vuex";
 import BaseButton from "@/components/base/BaseButton.vue";
 import { DxCheckBox } from "devextreme-vue/check-box";
-import { buttomEnum, userGroupData } from "@/scripts/enum";
+import { buttomEnum } from "@/scripts/enum";
 import avatarImg from "@/assets/Icons/avatar.png";
 export default {
   name: "PopupEditUserGroup",
@@ -72,10 +74,15 @@ export default {
     BaseButton,
     DxCheckBox,
   },
+  props: {
+    userGroupsTagW: {
+      type: Array,
+    },
+  },
   data() {
     return {
       buttomEnum,
-      userGroupData,
+      userGroupData: [],
       avatarImg,
     };
   },
@@ -87,17 +94,40 @@ export default {
     handleHidePopupEditUserGroup() {
       this.$emit("hiddenPopupEditUserGroup");
     },
+    /**
+     * Gửi sự kiện lưu nhóm người dùng
+     * Author: TNDanh (9/9/2022)
+     */
+    handleSaveUserGroup() {
+      this.$emit(
+        "saveUserGroupInUser",
+        this.userGroupData.filter((userGroup) => userGroup.Check === true)
+      );
+      //this.$store.dispatch("editUserGroupInGroup", );
+    },
+    /**
+     * Xử lý khi checkbox
+     * Author: TNDanh (9/9/2022)
+     */
+    // handleChekbox(e) {
+    //   this.$emit("checkboxUserGroup", e);
+    //   console.log(this.userGroupsTagW);
+    // },
   },
   computed: {
-    userGroupForUser() {
-      return this.userGroupData.map((userGroup) => {
-        return {
-          ...userGroup,
-          Check: this.user.UserGroupName?.includes(userGroup.UserGroupName),
-        };
-      });
-    },
-    ...mapGetters(["user"]),
+    ...mapGetters(["user", "userGroupsTagW"]),
+  },
+  mounted() {
+    this.userGroupData = this.userGroupsTagW.map((userGroup) => {
+      return {
+        ...userGroup,
+        Check: this.user.UserGroupName?.split(", ")?.includes(
+          userGroup.UserGroupName
+        )
+          ? true
+          : false,
+      };
+    });
   },
 };
 </script>

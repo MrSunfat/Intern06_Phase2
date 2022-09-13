@@ -9,28 +9,34 @@
     <div class="detail-preview-user-group__header">
       <div class="header__top">
         <h1 class="user-group-name no-mg font-20 bold">
-          Lãnh đạo đơn vị phê duyệt đề nghị công tác
+          {{ userGroupCurrent?.UserGroupName }}
         </h1>
         <BaseTagStatus
           class="tag no-mg bolder-text"
-          :content="statusTagEnum.Content.Use"
+          :content="userGroupCurrent?.Status"
           :dot="statusTagEnum.Dot.Show"
           type="on"
         />
       </div>
       <div class="header__bottom mg-t-16">
         <span class="description">
-          Nhóm gồm các Thủ trưởng đơn vị (Vụ trưởng/Viện trưởng/...) thuộc Tổng
-          cục tham gia phê duyệt đề nghị đi công tác
+          {{ userGroupCurrent?.Description }}
         </span>
       </div>
     </div>
     <div class="detail-preview-user-group__body">
       <div class="title bold mg-b-12">
-        Thành viên&nbsp;<span class="bold">(4)</span>
+        Thành viên&nbsp;<span class="bold"
+          >({{ userGroup?.Members?.length || 0 }})</span
+        >
       </div>
       <div class="d-f control mg-b-14">
-        <BaseInputSearch :placeholderText="placholderText.InputMember" />
+        <BaseInputSearch
+          :placeholderText="placholderText.InputMember"
+          :valueText="userGroupDetail.searchWord"
+          @twoWayValue="handleSearchMemberInUserGroup"
+          @enterKey="handleEnterKeyWhenSearch"
+        />
         <BaseButton
           :nameBtn="buttomEnum.nameBtn.AddMember"
           :type="buttomEnum.typeBtn.Primary"
@@ -38,9 +44,18 @@
           @click="handleShowPopupAddMember"
         />
       </div>
-      <div class="control-plus" v-show="selectedMemberNumber">
+      <div
+        class="control-plus"
+        v-show="
+          this.membersInUserGroup?.filter((member) => member.Check === true)
+            .length
+        "
+      >
         <span class="selected-mem mg-r-16">
-          {{ selectedMemberNumber }} đang chọn
+          {{
+            membersInUserGroup?.filter((member) => member.Check === true).length
+          }}
+          đang chọn
         </span>
         <p class="unchecked mg-r-16" @click="handleUnCheckAll">
           {{ buttomEnum.nameBtn.UnChecked }}
@@ -48,29 +63,38 @@
         <BaseButton
           :nameBtn="buttomEnum.nameBtn.RemoveMember"
           :type="buttomEnum.typeBtn.Warn"
+          @click="deleteMembers"
         />
       </div>
       <div class="container">
         <div
           class="member"
-          v-for="member in userFromGroup"
-          :key="member.UserID"
+          v-for="member in membersInUserGroup"
+          :key="member.MemberID"
         >
-          <DxCheckBox v-model="member.Check" class="input-checkbox mg-r-14" />
+          <DxCheckBox
+            v-model:value="member.Check"
+            class="input-checkbox mg-r-14"
+          />
           <div class="member__content">
             <div class="avatar mg-r-14">
               <img :src="avatarImg" alt="avatar" class="avatar__img" />
             </div>
             <div class="member__detail">
               <div class="full-name">
-                {{ member.UserName }}&nbsp;<span>({{ member.Email }})</span>
+                {{ member?.MemberName }}&nbsp;<span v-show="member?.Email"
+                  >({{ member.Email }})</span
+                >
               </div>
-              <div class="position">
-                {{ member.Position }} - {{ member.Offical }}
+              <div class="position nowrap" :title="member.MemberDescription">
+                {{ member?.MemberDescription }}
               </div>
             </div>
           </div>
-          <div class="icon-size delete-member">
+          <div
+            class="icon-size delete-member"
+            @click="handleRemoveMemberInUserGroup(member)"
+          >
             <div class="icon-title-size"></div>
           </div>
         </div>
@@ -80,6 +104,7 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import { statusTagEnum, buttomEnum } from "@/scripts/enum";
 import { placholderText } from "@/scripts/constants";
 import BaseTagStatus from "@/components/base/BaseTagStatus.vue";
@@ -101,31 +126,12 @@ export default {
       placholderText,
       statusTagEnum,
       buttomEnum,
-      userFromGroup: [
-        {
-          UserID: 1,
-          UserName: "Đinh Bảo Ngọc",
-          Email: "user12@tctk.misa.vn",
-          Position: "Tổng Cục trưởng",
-          Offical: "Tổng cục Thống Kê",
-        },
-        {
-          UserID: 2,
-          UserName: "Đinh Bảo Ngọc",
-          Email: "user12@tctk.misa.vn",
-          Position: "Tổng Cục trưởng",
-          Offical: "Tổng cục Thống Kê",
-        },
-        {
-          UserID: 3,
-          UserName: "Đinh Bảo Ngọc",
-          Email: "user12@tctk.misa.vn",
-          Position: "Tổng Cục trưởng",
-          Offical: "Tổng cục Thống Kê",
-        },
-      ],
       selectedMemberNumber: 0,
       avatarImg,
+      userGroupDetail: {
+        searchWord: "",
+      },
+      membersInUserGroup: [],
     };
   },
   methods: {
@@ -159,22 +165,70 @@ export default {
      * Author: TNDanh (29/8/2022)
      */
     handleInitUserWithChekbox() {
-      this.userFromGroup = this.userFromGroup.map((user) => ({
-        ...user,
-        Check: false,
-      }));
+      this.$store.commit("setUserGroup", {
+        ...this.userGroup,
+        Members: this.userGroup?.Members?.map((member) => ({
+          ...member,
+          Check: false,
+        })),
+      });
     },
+    /**
+     *
+     */
+    handleCheck(e) {
+      console.log(e);
+    },
+    /**
+     * Nhận giá trị của searchWord
+     * Author: TNDanh (11/9/2022)
+     */
+    handleSearchMemberInUserGroup(value) {
+      this.userGroupDetail.searchWord = value;
+    },
+    /**
+     * Nhấn enter đẩy một sự kiện lên UserGroup xử lý
+     * Author: TNDanh (11/9/2022)
+     */
+    handleEnterKeyWhenSearch(value) {
+      this.$emit("searchKeyWord", value);
+    },
+    /**
+     * Gửi sự kiện xóa Member trong userGroup
+     * Author: TNDanh (11/9/2022)
+     */
+    handleRemoveMemberInUserGroup(memberID) {
+      this.$emit("deleteMember", memberID);
+    },
+    /**
+     * Gửi sự kiện xóa nhiều
+     * Author: TNDanh (12/9/2022)
+     */
+    deleteMembers() {
+      this.$emit(
+        "deleteMembers",
+        this.membersInUserGroup.filter((member) => member.Check)
+      );
+    },
+  },
+  computed: {
+    ...mapGetters(["userGroup", "userGroupCurrent"]),
   },
   created() {
     this.handleInitUserWithChekbox();
   },
+  mounted() {
+    // this.membersInUserGroup = this.userGroup.Members;
+  },
   watch: {
-    userFromGroup: {
+    userGroup: {
       handler() {
         // 2. Đếm số lượng member đang chọn
-        this.selectedMemberNumber = this.userFromGroup.filter(
+        this.selectedMemberNumber = this.userGroup?.Members?.filter(
           (user) => user.Check
         ).length;
+
+        this.membersInUserGroup = this.userGroup.Members;
       },
       deep: true,
     },
@@ -243,6 +297,11 @@ export default {
 /* --body-- */
 .detail-preview-user-group__body {
   margin-top: 24px;
+}
+
+.detail-preview-user-group__body .container {
+  height: 455px;
+  overflow: auto;
 }
 
 .detail-preview-user-group__body .container .member {
