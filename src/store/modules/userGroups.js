@@ -12,6 +12,7 @@ const userGroupsModule = {
             Description: '',
             Status: 1,
         },
+        memberCheckInUserGroup: [],
         totalUserGroups: 0,
         totalPageUserGroups: 0,
         userGroupStart: 0,
@@ -55,6 +56,9 @@ const userGroupsModule = {
         },
         userGroupCurrent(state) {
             return state.userGroupCurrent;
+        },
+        memberCheckInUserGroup(state) {
+            return state.memberCheckInUserGroup;
         },
     },
     actions: {
@@ -227,6 +231,15 @@ const userGroupsModule = {
             state.userGroup.Members = state.userGroup.Members.filter(
                 (member) => !memberIDs.includes(member.MemberID)
             );
+        },
+        /**
+         * Xét giá trị của thành viên dã chọn trong nhóm người dùng
+         * @param {*} state
+         * @param {*} memberCheckInUserGroup
+         * Author: TNDanh (14/9/2022)
+         */
+        setMemberCheckInUserGroup(state, memberCheckInUserGroup) {
+            state.memberCheckInUserGroup = memberCheckInUserGroup;
         },
     },
 };

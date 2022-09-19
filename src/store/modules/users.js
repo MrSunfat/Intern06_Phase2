@@ -161,6 +161,30 @@ const usersModule = {
                 console.log(error);
             }
         },
+        /**
+         * Thêm nhiều người dùng
+         * @param {*} param0
+         * @param {*} users
+         * @returns
+         * Author: TNDanh (19/9/2022)
+         */
+        async addUsers({ commit }, users) {
+            try {
+                const res = await axios.post(
+                    `${domain}/${user}/AddUsers`,
+                    users,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json; charset=utf-8',
+                        },
+                    }
+                );
+                commit('');
+                return res;
+            } catch (error) {
+                console.log(error);
+            }
+        },
     },
     mutations: {
         /**

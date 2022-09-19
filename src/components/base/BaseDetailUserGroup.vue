@@ -75,6 +75,7 @@
           <DxCheckBox
             v-model:value="member.Check"
             class="input-checkbox mg-r-14"
+            @valueChanged="handleValueChanged"
           />
           <div class="member__content">
             <div class="avatar mg-r-14">
@@ -132,6 +133,8 @@ export default {
         searchWord: "",
       },
       membersInUserGroup: [],
+      membersChecked: [],
+      event: null,
     };
   },
   methods: {
@@ -141,6 +144,7 @@ export default {
      */
     handleHideDetailUserGroup() {
       this.$emit("hideDetailUserGroup");
+      this.$store.commit("setMemberCheckInUserGroup", []);
     },
     /**
      * Tạo sự kiện mở Popup Add Member
@@ -156,7 +160,7 @@ export default {
     handleUnCheckAll() {
       // 1. Bỏ check toàn bộ member
       this.handleInitUserWithChekbox();
-
+      this.$store.commit("setMemberCheckInUserGroup", []);
       // Xét số member đang chọn là 0
       this.selectedMemberNumber = 0;
     },
@@ -184,7 +188,12 @@ export default {
      * Author: TNDanh (11/9/2022)
      */
     handleSearchMemberInUserGroup(value) {
-      this.userGroupDetail.searchWord = value;
+      const me = this;
+      me.userGroupDetail.searchWord = value;
+      clearTimeout(me.event);
+      me.event = setTimeout(() => {
+        me.handleEnterKeyWhenSearch(value);
+      }, 500);
     },
     /**
      * Nhấn enter đẩy một sự kiện lên UserGroup xử lý
@@ -205,14 +214,20 @@ export default {
      * Author: TNDanh (12/9/2022)
      */
     deleteMembers() {
-      this.$emit(
-        "deleteMembers",
-        this.membersInUserGroup.filter((member) => member.Check)
+      let membersCheck = this.membersInUserGroup.filter(
+        (member) => member.Check
       );
+      this.$emit("deleteMembers", membersCheck);
+    },
+    handleValueChanged() {
+      let membersCheck = this.membersInUserGroup
+        .filter((member) => member.Check)
+        .map((member) => member.MemberID);
+      this.$store.commit("setMemberCheckInUserGroup", membersCheck);
     },
   },
   computed: {
-    ...mapGetters(["userGroup", "userGroupCurrent"]),
+    ...mapGetters(["userGroup", "userGroupCurrent", "memberCheckInUserGroup"]),
   },
   created() {
     this.handleInitUserWithChekbox();
@@ -228,7 +243,12 @@ export default {
           (user) => user.Check
         ).length;
 
-        this.membersInUserGroup = this.userGroup.Members;
+        this.membersInUserGroup = this.userGroup.Members?.map((member) => ({
+          ...member,
+          Check: this.memberCheckInUserGroup.includes(member.MemberID)
+            ? true
+            : false,
+        }));
       },
       deep: true,
     },

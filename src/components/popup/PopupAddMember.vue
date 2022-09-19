@@ -54,12 +54,18 @@
             </template>
           </DxDropDownBox>
         </div>
-        <div class="body">
-          <div class="body__content">
+        <div class="body" :class="{ 'body-collapse': controlHeight >= 80 }">
+          <div
+            class="body__content"
+            :class="{ show: membersWillAdd.length !== 0 }"
+          >
             <span class="select">{{ membersWillAdd.length }} đang chọn</span>
             <span class="unchecked" @click="handleUnchecked">Bỏ chọn</span>
           </div>
-          <div class="body__main">
+          <div
+            class="body__main"
+            :class="{ 'body-collapse': membersWillAdd.length !== 0 }"
+          >
             <DxDataGrid
               :data-source="users"
               key-expr="UserID"
@@ -89,18 +95,18 @@
               <LoadingComp />
             </div>
           </div>
-          <div class="body__footer">
-            <BasePagination
-              :pageNumber="pageDetail.pageNumber"
-              :totalPage="totalPage"
-              :totalRecord="totalUsers"
-              :recordStart="userStart"
-              :recordEnd="userEnd"
-              @pageSize="handleChangePageSize"
-              @prevPage="handleLoadDataInPage"
-              @nextPage="handleLoadDataInPage"
-            />
-          </div>
+        </div>
+        <div class="body__footer">
+          <BasePagination
+            :pageNumber="pageDetail.pageNumber"
+            :totalPage="totalPage"
+            :totalRecord="totalUsers"
+            :recordStart="userStart"
+            :recordEnd="userEnd"
+            @pageSize="handleChangePageSize"
+            @prevPage="handleLoadDataInPage"
+            @nextPage="handleLoadDataInPage"
+          />
         </div>
       </div>
       <div class="popup-add-member__footer">
@@ -188,6 +194,7 @@ export default {
       selectedRowKeys: [],
       UserGroupID: "",
       selectionFilter: ["Check", "=", true],
+      controlHeight: 0,
     };
   },
   methods: {
@@ -254,14 +261,10 @@ export default {
     handleSelectJobTitle(jobTitle) {
       this.pageDetail.jobTitle = jobTitle.value.join(",");
       this.handleGetUsers();
+      this.controlHeight = document.querySelector(
+        ".popup-add-member__main .control"
+      ).offsetHeight;
     },
-    /**
-     * Gửi sự kiện -> đóng
-     * Author: TNDanh (12/9/2022)
-     */
-    // hanleClosePopupAddMember() {
-    //   this.$emit("closePopupAddMember");
-    // },
     /**
      * Xử lý khi lưu các member được thêm vào
      * Author: TNDanh (12/9/2022)
@@ -271,10 +274,6 @@ export default {
         userGroupID: this.userGroupCurrent.UserGroupID,
         memberIDs: this.membersWillAdd,
       });
-      // await this.$store.dispatch("getUserGroupByID", {
-      //   userGroupID: this.userGroupCurrent.serGroupID,
-      //   searchWord: "",
-      // });
       this.handleHidePopupAddMember();
     },
     /**
@@ -431,9 +430,9 @@ export default {
 
 /* body */
 .popup-add-member__main .body {
-  position: relative;
-  max-height: calc(100% - 38px);
-  height: calc(100% - 38px);
+  margin-top: 10px;
+  /* max-height: calc(100% - 94px); */
+  height: calc(100% - 112px);
   overflow: hidden;
 }
 
@@ -441,19 +440,31 @@ export default {
   position: absolute;
   content: "";
   bottom: 5px;
-  right: 0;
-  left: 0;
+  right: 24px;
+  left: 24px;
 }
 
 .popup-add-member__main .body__main {
-  max-height: calc(100% - 38px - 56px);
-  height: calc(100% - 38px - 56px);
+  height: 100%;
   overflow: auto;
+}
+
+.popup-add-member__main .body__main.body-collapse {
+  height: calc(100% - 51px);
 }
 
 .popup-add-member__main .body__content {
   margin-top: 16px;
   margin-bottom: 16px;
+  display: none;
+}
+
+.popup-add-member__main .body__content.show {
+  display: block;
+}
+
+.popup-add-member__main .body.body-collapse {
+  height: calc(100% - 165px);
 }
 
 .popup-add-member__main .body__content .select {
@@ -462,6 +473,7 @@ export default {
 .popup-add-member__main .body__content .unchecked {
   color: var(--primary);
   margin-left: 24px;
+  cursor: pointer;
 }
 
 .popup-add-member__main .control__search {

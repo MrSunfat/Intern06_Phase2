@@ -7,9 +7,15 @@
       </div>
       <div class="dialog-warn__container__header bold">Loại bỏ người dùng</div>
       <div class="dialog-warn__container__body">
-        Bạn có chắc chắn muốn loại bỏ <span v-html="contentMessage"></span> ra
-        khỏi nhóm
-        <span class="bold">{{ userGroupCurrent?.UserGroupName }}</span>
+        Bạn có chắc chắn muốn loại bỏ
+        <span v-show="type === 'user-group'" v-html="contentMessage"></span>
+        <span class="bold" v-show="user?.FullName">{{ user?.FullName }}</span>
+        ra khỏi
+        <span class="bold" v-show="type === 'user-group'"
+          >nhóm {{ userGroupCurrent?.UserGroupName }}</span
+        >
+
+        <span class="bold" v-show="type === 'user'">trang Người dùng</span>
         không?
       </div>
       <div class="dialog-warn__container__footer">
@@ -43,6 +49,12 @@ export default {
     members: {
       type: Array || Object,
     },
+    type: {
+      type: String,
+    },
+    user: {
+      type: Object,
+    },
   },
   data() {
     return {
@@ -63,6 +75,7 @@ export default {
         memberIDs = this.members.map((member) => {
           return member.MemberID;
         });
+        this.$store.commit("setMemberCheckInUserGroup", []);
       }
       this.$emit("agreeDeleteMember", memberIDs);
     },

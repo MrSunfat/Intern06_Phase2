@@ -23,6 +23,7 @@
           :show-borders="false"
           :focused-row-enabled="true"
           @row-click="handleShowDetailUserGroup"
+          :noDataText="noDataText.userGroup"
         >
           <DxColumn
             data-field="UserGroupName"
@@ -82,6 +83,7 @@
     <DialogWarn
       v-if="isDialog"
       :members="membersNeedRemove"
+      type="user-group"
       @closeDialog="handleCloseDialog"
       @agreeDeleteMember="handleAgreeDeleteMember"
     />
@@ -90,7 +92,7 @@
 
 <script>
 import { mapGetters } from "vuex";
-import { placholderText, userGroupInfo } from "@/scripts/constants";
+import { placholderText, userGroupInfo, noDataText } from "@/scripts/constants";
 import { userGroupData, statusTagEnum } from "@/scripts/enum";
 import { DxDataGrid, DxColumn } from "devextreme-vue/data-grid";
 import BaseInputSearch from "@/components/base/BaseInputSearch.vue";
@@ -130,6 +132,8 @@ export default {
       },
       userGroupIDCurrent: "",
       membersNeedRemove: [],
+      event: null,
+      noDataText,
     };
   },
   methods: {
@@ -138,7 +142,12 @@ export default {
      * Author: TNDanh (27/8/2022)
      */
     modelValueSearch(value) {
+      const me = this;
       this.pageDetail.searchWord = value;
+      clearTimeout(me.event);
+      me.event = setTimeout(() => {
+        me.handleEnterKeyWhenSearch();
+      }, 500);
     },
     /**
      * Mở DetailUserGroup
@@ -256,7 +265,6 @@ export default {
      * Author: TNDanh (11/9/2022)
      */
     async handleAgreeDeleteMember(members) {
-      console.log(members);
       await this.$store.dispatch("deleteMemberInUserGroup", {
         userGroupID: this.userGroupCurrent.UserGroupID,
         memberIDs: [...members],
@@ -321,7 +329,7 @@ export default {
 /* Body */
 .user-group__body {
   max-height: calc(100% - var(--footer-height));
-  overflow: scroll;
+  overflow: auto;
 }
 
 .user-group__body::-webkit-scrollbar {

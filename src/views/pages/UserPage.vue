@@ -32,6 +32,7 @@
             :nameBtn="buttomEnum.nameBtn.Import"
             :type="buttomEnum.typeBtn.Primary"
             positionIcon="-237px 0px"
+            @click="handleShowPopupImportFile"
           />
           <BaseButton
             class="mg-l-8"
@@ -60,6 +61,7 @@
           :show-borders="false"
           :focused-row-enabled="true"
           @row-click="handleShowDetailUser"
+          :noDataText="noDataText.user"
         >
           <DxColumn
             v-for="property in showPropertiesSelected"
@@ -68,6 +70,7 @@
             :caption="property.Name"
             :cell-template="property.Field === 'Status' && 'cellTemplateStatus'"
             :alignment="property.Field === 'Status' && 'center'"
+            :width="property.Width"
           />
           <template #cellTemplateStatus="{ data }">
             <BaseTagStatus
@@ -80,10 +83,10 @@
           <DxColumn
             data-field="UserID"
             caption=""
-            :width="50"
             cell-template="cellTemplateDelete"
             :allow-reordering="false"
             :allowResizing="false"
+            width="50"
           />
           <template #cellTemplateDelete="{ data }">
             <div
@@ -123,9 +126,11 @@
       v-if="isShowOption"
     >
       <BaseOption
+        v-if="isShowOption"
         class="option"
         @closeOption="handleHideOption"
         @changePropertiesUser="handleChangePropertiesFollowOption"
+        @refreshColumnOptions="handleRefreshColumnOptions"
       />
     </div>
     <PopupEditUserGroup
@@ -137,6 +142,17 @@
     <div class="loading" v-show="isLoading">
       <LoadingComp />
     </div>
+    <PopupImportFile
+      v-if="isPopupImportFile"
+      @hidePopupImportFile="handleHidePopupImportFile"
+    />
+    <DialogWarn
+      v-if="isDialog"
+      :user="userDetail"
+      type="user"
+      @closeDialog="handleCloseDialog"
+      @agreeDeleteMember="handleAgreeDeleteMember"
+    />
   </div>
 </template>
 
@@ -150,9 +166,8 @@ import {
   buttomEnum,
   currentRecord,
   statusTagEnum,
-  userPropertiesEnum,
 } from "@/scripts/enum";
-import { domain, user } from "@/scripts/constants";
+import { domain, user, noDataText } from "@/scripts/constants";
 import DxSelectBox from "devextreme-vue/select-box";
 import { DxDataGrid, DxColumn, DxPaging } from "devextreme-vue/data-grid";
 import BaseInputSearch from "@/components/base/BaseInputSearch.vue";
@@ -163,6 +178,8 @@ import BaseDetailUser from "@/components/base/BaseDetailUser.vue";
 import PopupEditUserGroup from "@/components/popup/PopupEditUserGroup.vue";
 import BaseTagStatus from "@/components/base/BaseTagStatus.vue";
 import LoadingComp from "@/components/Loading/LoadingComp.vue";
+import PopupImportFile from "@/components/popup/PopupImportFile.vue";
+import DialogWarn from "@/components/dialog/DialogWarn.vue";
 
 export default {
   name: "UserPage",
@@ -181,12 +198,16 @@ export default {
       isShowPopupEditUserGroup: false,
       isShowOption: false,
       isLoading: false,
+      isPopupImportFile: false,
+      isDialog: false,
       pageDetail: {
         pageSize: 50,
         pageNumber: 1,
         searchWord: "",
         userGroupName: "",
       },
+      event: null,
+      noDataText,
     };
   },
   components: {
@@ -202,6 +223,8 @@ export default {
     PopupEditUserGroup,
     BaseTagStatus,
     LoadingComp,
+    PopupImportFile,
+    DialogWarn,
   },
   methods: {
     /**
@@ -209,14 +232,18 @@ export default {
      * Author: TNDanh (27/8/2022)
      */
     modelValueSearch(value) {
+      const me = this;
       this.pageDetail.searchWord = value;
+      clearTimeout(me.event);
+      me.event = setTimeout(() => {
+        me.handleEnterKeyWhenSearch();
+      }, 500);
     },
     /**
      * Xử lý khi nhận sự kiện đóng DetailUser
      * Author: TNDanh (27/8/2022)
      */
     handleHideDetailUser() {
-      //this.$store.commit("setUserID", "");
       this.isShowDetailUser = false;
     },
     /**
@@ -225,9 +252,7 @@ export default {
      */
     async handleShowDetailUser(user) {
       await this.$store.dispatch("getUserByID", user.data.UserID);
-      console.log("Show Detail User ", user.data.UserID);
       this.isShowDetailUser = true;
-      //this.$store.commit("setUserID", user.data.UserID);
     },
     /**
      * Nhận sự kiện mở popup edit userGroup
@@ -265,26 +290,26 @@ export default {
      * Author: TNDanh (30/8/2022)
      */
     async handleDeleteUser(userID) {
-      console.log("Xóa - ", userID);
-      await this.$store.dispatch("deleteUserByID", userID);
-      this.handleGetUsers();
-      // alert(`userID - ${user.data.UserID}`);
-    },
-    /**
-     * Nhận các thuộc tính của user
-     * Author: TNDanh (31/8/2022)
-     */
-    receivePropertiesUser() {
-      this.userProperties =
-        JSON.parse(localStorage.getItem("userProperties")) ||
-        userPropertiesEnum;
+      // console.log("Xóa - ", userID);
+      this.isDialog = true;
+      this.$store.commit("setUserID", userID);
     },
     /**
      * Xét các thuộc tính của user nhận theo sự thay đổi của tùy chỉnh cột
      * Author: TNDanh (31/8/2022)
      */
-    handleChangePropertiesFollowOption(newProperties) {
-      this.userProperties = newProperties;
+    async handleChangePropertiesFollowOption(newProperties) {
+      // this.userProperties = newProperties;
+      await this.$store.dispatch("updateColumnsOption", newProperties);
+      this.handleInitData();
+    },
+    /**
+     * Xét bộ tùy chỉnh cột mặc định
+     * Author: TNDanh (19/9/2022)
+     */
+    async handleRefreshColumnOptions() {
+      await this.$store.dispatch("updateDefaultColumnsOption");
+      this.handleInitData();
     },
     /**
      * Xét các pageSize khác nhau
@@ -307,9 +332,9 @@ export default {
      * Lấy users mới
      * Author: TNDanh (7/9/2022)
      */
-    handleGetUsers() {
+    async handleGetUsers() {
       this.isLoading = true;
-      this.$store.dispatch("getUsers", this.pageDetail);
+      await this.$store.dispatch("getUsers", this.pageDetail);
     },
     /**
      * Nhấn enter ở ô tìm kiếm thì lấy users mới
@@ -325,6 +350,7 @@ export default {
      */
     handleSelectUserGroup(userGroup) {
       this.pageDetail.userGroupName = userGroup.value;
+      this.pageDetail.pageNumber = 1;
       if (userGroup.value === "Tất cả") {
         this.pageDetail.userGroupName = "";
       }
@@ -336,6 +362,12 @@ export default {
      */
     async handleInitData() {
       this.isLoading = true;
+      const res = await this.$store.dispatch("getColumnsOption");
+      this.userProperties = res.data;
+      localStorage.setItem(
+        "userProperties",
+        JSON.stringify(this.userProperties)
+      );
       await this.$store.dispatch("getAllUserGroupTag");
       await this.handleGetUsers();
     },
@@ -344,10 +376,6 @@ export default {
      * Author: TNDanh (9/9/2022)
      */
     async handleSaveUserGroup(userGroups) {
-      // console.log("Lưu nhóm ngdunf", {
-      //   userID: this.user.UserID,
-      //   userGroups,
-      // });
       this.isLoading = true;
       this.isShowPopupEditUserGroup = false;
       this.handleHideDetailUser();
@@ -356,8 +384,6 @@ export default {
         userGroups,
       });
       await this.handleGetUsers();
-      //await this.$store.dispatch("getAllUserGroupTag");
-      //this.isLoading = false;
     },
     /**
      * Xử lý xuất khẩu
@@ -378,8 +404,43 @@ export default {
         document.body.removeChild(link);
       });
     },
+    /**
+     * Đóng PopupImportFile
+     * Author: TNDanh (18/9/2022)
+     */
+    async handleHidePopupImportFile() {
+      this.isPopupImportFile = false;
+      await this.handleGetUsers();
+    },
+    /**
+     * Mở PopupImportFile
+     * Author: TNDanh (18/9/2022)
+     */
+    handleShowPopupImportFile() {
+      this.isPopupImportFile = true;
+    },
+    /**
+     * Đóng dialog
+     * Author: TNDanh (19/9/2022)
+     */
+    handleCloseDialog() {
+      this.isDialog = false;
+      this.$store.commit("setUserID", "");
+    },
+    /**
+     * Thực hiện đồng ý của dialog
+     * Author: TNDanh (19/9/2022)
+     */
+    async handleAgreeDeleteMember() {
+      await this.$store.dispatch("deleteUserByID", this.user?.userID);
+      this.handleCloseDialog();
+      this.handleGetUsers();
+    },
   },
   computed: {
+    userDetail() {
+      return this.users.find((us) => us.UserID === this.user.userID);
+    },
     showPropertiesSelected() {
       return this.userProperties.filter((property) => property?.Selected);
     },
@@ -393,17 +454,13 @@ export default {
       "userGroupsTag",
       "userGroupsTagW",
       "userDetailForUserGroup",
+      "columnsOption",
     ]),
   },
   created() {
-    this.receivePropertiesUser();
     this.handleInitData();
   },
-  mounted() {
-    // this.userGroupData.unshift({
-    //   UserGroupName: "Tất cả",
-    // });
-  },
+  mounted() {},
   watch: {
     users() {
       this.isLoading = false;
@@ -443,7 +500,7 @@ export default {
 
 .user__content {
   max-height: calc(100% - var(--footer-height));
-  overflow: scroll;
+  overflow: auto;
 }
 
 .user__content::-webkit-scrollbar {

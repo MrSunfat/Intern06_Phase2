@@ -6,6 +6,6 @@
 
 .main {
     display: grid;
-    grid-template-columns: var(--width-sidebar) calc(100% - var(--width-sidebar));
+    grid-template-columns: var(--width-sidebar) calc(100vw - var(--width-sidebar));
     max-height: calc(100vh - var(--height-header));
 }

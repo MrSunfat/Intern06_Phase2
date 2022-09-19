@@ -1,6 +1,8 @@
 const nameBtn = {
     Import: 'Nhập khẩu',
     Export: 'Xuất khẩu',
+    DownloadExcelTemplate: 'Tải file nhập khẩu mẫu',
+    UploadExcel: 'Up file excel lên',
     AddMember: 'Thêm thành viên',
     RemoveMember: 'Loại bỏ thành viên',
     UnChecked: 'Bỏ chọn',
@@ -10,6 +12,8 @@ const nameBtn = {
     Agree: 'Đồng ý',
     No: 'Không',
     YesAndRemove: 'Có, loại bỏ',
+    Continue: 'Tiếp tục',
+    Back: 'Quay lại',
 };
 
 const typeBtn = {

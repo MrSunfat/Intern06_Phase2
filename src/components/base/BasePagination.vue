@@ -17,7 +17,7 @@
         />
         <span class="current__record d-f font-14">
           <h1 class="title no-mg font-14 bold">
-            {{ recordStart }} - {{ recordEnd }}
+            {{ recordStart }} - {{ recordEnd || 1 }}
           </h1>
           &nbsp;bản ghi
         </span>

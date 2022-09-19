@@ -8,7 +8,10 @@
         </div>
       </div>
       <div class="header__bottom">
-        <BaseInputSearch :placeholderText="placholderText.Search" />
+        <BaseInputSearch
+          :placeholderText="placholderText.Search"
+          @twoWayValue="handleFilterColumnOption"
+        />
       </div>
     </div>
     <div id="base-option__container">
@@ -17,6 +20,7 @@
           :data-source="userProperties"
           :repaint-changes-only="true"
           key-expr="Field"
+          noDataText="Không có dữ liệu"
         >
           <template #item="{ data: item }">
             <DxCheckBox v-model="item.Selected" :text="item.Name" />
@@ -42,7 +46,7 @@
 </template>
 <script>
 import DxList, { DxItemDragging } from "devextreme-vue/list";
-import { userPropertiesEnum, buttomEnum } from "@/scripts/enum";
+import { buttomEnum } from "@/scripts/enum";
 import { placholderText } from "@/scripts/constants";
 import BaseInputSearch from "@/components/base/BaseInputSearch.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
@@ -84,7 +88,6 @@ export default {
      * Author: TNDanh (30/8/2022)
      */
     handleSaveOption() {
-      console.log(this.userProperties);
       localStorage.setItem(
         "userProperties",
         JSON.stringify(this.userProperties)
@@ -99,15 +102,37 @@ export default {
      * Author: TNDanh (30/8/2022)
      */
     handleRefreshOption() {
-      this.userProperties = userPropertiesEnum;
-      this.handleSaveOption();
+      this.$emit("closeOption");
+      this.$emit("refreshColumnOptions");
+      // this.handleSaveOption();
+    },
+    /**
+     * Nhập chữ trong lọc tùy chọn cột
+     * Author: TNDanh (13/9/2022)
+     */
+    handleFilterColumnOption(value) {
+      if (value) {
+        this.userProperties = this.userProperties.filter((property) =>
+          property.Name.toLowerCase()?.includes(value.toLowerCase())
+        );
+      } else {
+        this.handleInitColumnOption();
+      }
+    },
+    /**
+     * Xét giá trị cho tùy chọn cột
+     * Author: TNDanh (13/9/2022)
+     */
+    handleInitColumnOption() {
+      this.userProperties =
+        JSON.parse(localStorage.getItem("userProperties")) || [];
     },
   },
-  created() {
-    this.userProperties =
-      JSON.parse(localStorage.getItem("userProperties")) || userPropertiesEnum;
-  },
   watch: {},
+  computed: {},
+  mounted() {
+    this.handleInitColumnOption();
+  },
 };
 </script>
 <style scoped>
