@@ -22,8 +22,10 @@
           :allow-column-resizing="true"
           :show-borders="false"
           :focused-row-enabled="true"
+          column-resizing-mode="widget"
           @row-click="handleShowDetailUserGroup"
           :noDataText="noDataText.userGroup"
+          height="100%"
         >
           <DxColumn
             data-field="UserGroupName"
@@ -328,8 +330,7 @@ export default {
 
 /* Body */
 .user-group__body {
-  max-height: calc(100% - var(--footer-height));
-  overflow: auto;
+  height: calc(100% - var(--footer-height));
 }
 
 .user-group__body::-webkit-scrollbar {

@@ -77,6 +77,7 @@
               :selection-filter="selectionFilter"
               v-model:selected-row-keys="membersWillAdd"
               @selection-changed="onSelectionChanged"
+              height="100%"
             >
               <DxSelection
                 mode="multiple"
@@ -130,7 +131,6 @@
 <script>
 import { mapGetters } from "vuex";
 import BaseButton from "@/components/base/BaseButton.vue";
-// import { DxCheckBox } from "devextreme-vue/check-box";
 import {
   DxDataGrid,
   DxColumn,
@@ -318,9 +318,6 @@ export default {
     },
     userGroupCurrent: {
       handler() {
-        // this.membersWillAdd = this.userGroupCurrent?.map((member) => {
-        //   return member.MemberID;
-        // });
         console.log(this.membersWillAdd);
       },
       deep: true,
@@ -446,7 +443,7 @@ export default {
 
 .popup-add-member__main .body__main {
   height: 100%;
-  overflow: auto;
+  /* overflow: auto; */
 }
 
 .popup-add-member__main .body__main.body-collapse {

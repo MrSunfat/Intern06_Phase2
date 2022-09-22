@@ -88,10 +88,10 @@ export default {
      * Author: TNDanh (30/8/2022)
      */
     handleSaveOption() {
-      localStorage.setItem(
-        "userProperties",
-        JSON.stringify(this.userProperties)
-      );
+      // localStorage.setItem(
+      //   "userProperties",
+      //   JSON.stringify(this.userProperties)
+      // );
       // Gửi sự kiện đóng Option
       this.$emit("closeOption");
       // Gửi sự kiện thay đổi thuộc tính của user
@@ -104,7 +104,6 @@ export default {
     handleRefreshOption() {
       this.$emit("closeOption");
       this.$emit("refreshColumnOptions");
-      // this.handleSaveOption();
     },
     /**
      * Nhập chữ trong lọc tùy chọn cột

@@ -121,7 +121,8 @@ export default {
       validRecord: 0,
       illegalRecord: 0,
       errorMessage: "",
-      users: [],
+      validUsers: [],
+      invalidUsers: [],
     };
   },
   methods: {
@@ -148,12 +149,35 @@ export default {
         case 1:
           this.step = 2;
           break;
-
         default:
-          await this.$store.dispatch("addUsers", this.users);
+          // 1. Thực hiện thêm các user thỏa mãn
+          await this.$store.dispatch("addUsers", this.validUsers);
+          // 2. Thực hiện tải file excel chứa người dùng không hợp lệ (nếu có)
+          if (this.invalidUsers.length > 0) {
+            await this.handleExportInvalidUsersFile();
+          }
           this.handleHidePopupImportFile();
-          break;
       }
+    },
+    /**
+     * Xử lý trả lại file excel chứa người dùng không hợp lệ
+     * Author: TNDanh (21/9/2022)
+     */
+    async handleExportInvalidUsersFile() {
+      await axios({
+        url: `${domain}/${user}/ExportInvalidUsers`,
+        method: "POST",
+        responseType: "blob",
+        data: this.invalidUsers,
+      }).then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "Danh sách người dùng không hợp lệ.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
     },
     /**
      * Tải file mẫu để nhập khẩu
@@ -202,12 +226,14 @@ export default {
         this.totalRecord = 0;
         this.illegalRecord = 0;
         this.validRecord = 0;
-        this.users = [];
+        this.validUsers = [];
+        this.invalidUsers = [];
       } else {
         this.totalRecord = res.data?.Rows;
         this.illegalRecord = res.data?.IllegalRow;
         this.validRecord = res.data?.ValidRow;
-        this.users = res.data?.Users;
+        this.validUsers = res.data?.ValidUsers;
+        this.invalidUsers = res.data?.InvalidUsers;
         this.errorMessage = "";
       }
     },
@@ -310,7 +336,7 @@ export default {
 .popup-import-file__steps .step-one::after {
   position: relative;
   content: "";
-  right: -142px;
+  right: -144px;
   border-left: 10px solid transparent;
   border-top: 20px solid #fff;
   border-bottom: 20px solid #fff;
@@ -320,7 +346,7 @@ export default {
 .popup-import-file__steps .step-two::before {
   position: relative;
   content: "";
-  right: 116px;
+  right: 113px;
   border-left: 10px solid #fff;
   border-top: 20px solid transparent;
   border-bottom: 20px solid transparent;

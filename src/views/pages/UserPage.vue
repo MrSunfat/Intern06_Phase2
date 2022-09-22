@@ -62,6 +62,7 @@
           :focused-row-enabled="true"
           @row-click="handleShowDetailUser"
           :noDataText="noDataText.user"
+          height="100%"
         >
           <DxColumn
             v-for="property in showPropertiesSelected"
@@ -499,8 +500,8 @@ export default {
 }
 
 .user__content {
-  max-height: calc(100% - var(--footer-height));
-  overflow: auto;
+  height: calc(100% - var(--footer-height));
+  /* overflow: auto; */
 }
 
 .user__content::-webkit-scrollbar {
