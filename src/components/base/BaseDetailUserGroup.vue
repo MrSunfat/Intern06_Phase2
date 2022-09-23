@@ -178,12 +178,6 @@ export default {
       });
     },
     /**
-     *
-     */
-    handleCheck(e) {
-      console.log(e);
-    },
-    /**
      * Nhận giá trị của searchWord
      * Author: TNDanh (11/9/2022)
      */
@@ -219,6 +213,10 @@ export default {
       );
       this.$emit("deleteMembers", membersCheck);
     },
+    /**
+     * Lưu các id của người dùng trong nhóm người dùng
+     * Author: TNDanh (22/9/2022)
+     */
     handleValueChanged() {
       let membersCheck = this.membersInUserGroup
         .filter((member) => member.Check)

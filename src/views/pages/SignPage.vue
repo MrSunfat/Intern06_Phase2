@@ -1,16 +1,11 @@
 <template>
-  <div class="sign">
-    <TreeList />
-  </div>
+  <div class="sign">Tính năng đang phát triển</div>
 </template>
 
 <script>
-import TreeList from "@/components/popup/TreeList.vue";
 export default {
   name: "SignPage",
-  components: {
-    TreeList,
-  },
+  components: {},
 };
 </script>
 

@@ -61,5 +61,5 @@
 .page-size .dx-dropdowneditor-icon::before {
     mask: url("../../assets/Icons/ic_sprites_2.svg") no-repeat -146px -26px !important;
     height: 18px;
-    background-color: #000;
+    background-color: #868ca4;
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="authori">Authori</div>
+  <div class="authori">Tính năng đang phát triển</div>
 </template>
 
 <script>

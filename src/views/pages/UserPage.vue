@@ -146,6 +146,7 @@
     <PopupImportFile
       v-if="isPopupImportFile"
       @hidePopupImportFile="handleHidePopupImportFile"
+      @addUsersSuccess="handleAddUsersSuccess"
     />
     <DialogWarn
       v-if="isDialog"
@@ -153,6 +154,11 @@
       type="user"
       @closeDialog="handleCloseDialog"
       @agreeDeleteMember="handleAgreeDeleteMember"
+    />
+    <BaseToast
+      v-if="isToast"
+      :contentToast="contentToast"
+      @closeToast="handleCloseToast"
     />
   </div>
 </template>
@@ -181,6 +187,7 @@ import BaseTagStatus from "@/components/base/BaseTagStatus.vue";
 import LoadingComp from "@/components/Loading/LoadingComp.vue";
 import PopupImportFile from "@/components/popup/PopupImportFile.vue";
 import DialogWarn from "@/components/dialog/DialogWarn.vue";
+import BaseToast from "@/components/base/BaseToast.vue";
 
 export default {
   name: "UserPage",
@@ -209,6 +216,8 @@ export default {
       },
       event: null,
       noDataText,
+      isToast: false,
+      contentToast: "",
     };
   },
   components: {
@@ -226,6 +235,7 @@ export default {
     LoadingComp,
     PopupImportFile,
     DialogWarn,
+    BaseToast,
   },
   methods: {
     /**
@@ -385,6 +395,8 @@ export default {
         userGroups,
       });
       await this.handleGetUsers();
+      this.contentToast = "Lưu thành công !";
+      this.isToast = true;
     },
     /**
      * Xử lý xuất khẩu
@@ -436,6 +448,30 @@ export default {
       await this.$store.dispatch("deleteUserByID", this.user?.userID);
       this.handleCloseDialog();
       this.handleGetUsers();
+      this.contentToast = "Xóa thành công !";
+      this.isToast = true;
+    },
+    /**
+     * Hiện toast message
+     * Author: TNDanh (23/9/2022)
+     */
+    handleOpenToast() {
+      this.isToast = true;
+    },
+    /**
+     * Ẩn toast message
+     * Author: TNDanh (23/9/2022)
+     */
+    handleCloseToast() {
+      this.isToast = false;
+    },
+    /**
+     * Xử lý khi nhấn thêm người dùng mới thành công
+     * Author: TNDanh (23/9/2022)
+     */
+    handleAddUsersSuccess() {
+      this.contentToast = "Thêm mới người dùng thành công!";
+      this.handleOpenToast();
     },
   },
   computed: {

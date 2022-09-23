@@ -26,7 +26,7 @@
           @click="closeDialog"
         />
         <BaseButton
-          class=""
+          class="access-btn"
           :nameBtn="buttomEnum.nameBtn.YesAndRemove"
           :type="buttomEnum.typeBtn.Warn"
           @click="agreeDeleteMember"
@@ -167,5 +167,14 @@ export default {
   justify-content: flex-end;
   padding: 0 24px;
   background: #f2f2f2;
+}
+
+.access-btn {
+  background-color: #e61d1d;
+  /* color: #fff; */
+}
+
+.access-btn .warn-btn:hover > .base-btn__text {
+  color: #fff;
 }
 </style>

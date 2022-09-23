@@ -78,6 +78,7 @@
     <PopupAddMember
       v-show="isShowPopupAddMember"
       @hiddenPopupAddMember="handleHidePopupAddMember"
+      @saveMemberForUserGroup="handleSaveMemberForUserGroup"
     />
     <div class="loading" v-show="isLoading">
       <LoadingComp />
@@ -88,6 +89,11 @@
       type="user-group"
       @closeDialog="handleCloseDialog"
       @agreeDeleteMember="handleAgreeDeleteMember"
+    />
+    <BaseToast
+      v-if="isToast"
+      :contentToast="contentToast"
+      @closeToast="handleCloseToast"
     />
   </div>
 </template>
@@ -104,6 +110,7 @@ import PopupAddMember from "@/components/popup/PopupAddMember.vue";
 import BaseTagStatus from "@/components/base/BaseTagStatus.vue";
 import LoadingComp from "@/components/Loading/LoadingComp.vue";
 import DialogWarn from "@/components/dialog/DialogWarn.vue";
+import BaseToast from "@/components/base/BaseToast.vue";
 export default {
   name: "UserGroup",
   components: {
@@ -116,6 +123,7 @@ export default {
     DxColumn,
     LoadingComp,
     DialogWarn,
+    BaseToast,
   },
   data() {
     return {
@@ -127,6 +135,7 @@ export default {
       isShowPopupAddMember: false,
       isLoading: false,
       isDialog: false,
+      isToast: false,
       pageDetail: {
         pageSize: 50,
         pageNumber: 1,
@@ -136,6 +145,7 @@ export default {
       membersNeedRemove: [],
       event: null,
       noDataText,
+      contentToast: "",
     };
   },
   methods: {
@@ -274,6 +284,27 @@ export default {
       this.$store.commit("setMembersInUserGroup", members);
       await this.handleGetUserGroups();
       this.handleCloseDialog();
+      this.contentToast = "Xóa thành viên thành công !";
+      this.isToast = true;
+    },
+    /**
+     * Xử lý sự kiện tiếp theo sau khi lưu sự thay đổi thành viên trong nhóm người dùng
+     * Author: TNDanh (23/9/2022)
+     */
+    async handleSaveMemberForUserGroup() {
+      this.handleHidePopupAddMember();
+      this.handleHideDetailUserGroup();
+      this.isToast = true;
+      await this.handleGetUserGroups();
+      this.contentToast = "Lưu thành công !";
+      this.isToast = true;
+    },
+    /**
+     * Ẩn toast message
+     * Author: TNDanh (23/9/2022)
+     */
+    handleCloseToast() {
+      this.isToast = false;
     },
   },
   computed: {

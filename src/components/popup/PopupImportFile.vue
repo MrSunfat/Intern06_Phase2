@@ -51,14 +51,13 @@
                 positionIcon="-240px -49px"
                 @click="handleUploadFile"
               />
-              <span v-show="nameFile">{{ nameFile }}</span>
-              &nbsp;
+              <span class="mg-t-15" v-show="nameFile">{{ nameFile }}</span>
               <span class="red-color" v-show="errorMessage"
                 >({{ errorMessage }})</span
               >
             </div>
           </div>
-          <div class="check">
+          <div class="check" :class="{ import: nameFile }">
             <div class="check__record check-item">
               <h1 class="title">Số bản ghi</h1>
               <span class="content">{{ totalRecord }}</span>
@@ -71,6 +70,15 @@
               <h1 class="title">Không hợp lệ</h1>
               <span class="content">{{ illegalRecord }}</span>
             </div>
+          </div>
+          <div class="warn-invalid-users" v-show="invalidUsers?.length">
+            Bạn có thể nhấn
+            <span
+              class="c-p warn-invalid-users__link"
+              @click="handleExportInvalidUsersFile"
+              >tại đây</span
+            >
+            để xem thông tin người dùng không hợp lệ
           </div>
         </div>
       </div>
@@ -152,10 +160,11 @@ export default {
         default:
           // 1. Thực hiện thêm các user thỏa mãn
           await this.$store.dispatch("addUsers", this.validUsers);
+          this.$emit("addUsersSuccess");
           // 2. Thực hiện tải file excel chứa người dùng không hợp lệ (nếu có)
-          if (this.invalidUsers.length > 0) {
-            await this.handleExportInvalidUsersFile();
-          }
+          // if (this.invalidUsers.length > 0) {
+          //   await this.handleExportInvalidUsersFile();
+          // }
           this.handleHidePopupImportFile();
       }
     },
@@ -211,7 +220,7 @@ export default {
      */
     async handleChooseFile(e) {
       this.file = e.target.files[0];
-      this.nameFile = e.target.files[0].name;
+      this.nameFile = e.target.files[0]?.name;
       let form = new FormData();
       form.append("file", this.file);
       const res = await axios.post(`${domain}/${user}/Import`, form, {
@@ -327,7 +336,7 @@ export default {
 
 .popup-import-file__steps .step-one,
 .popup-import-file__steps .step-two {
-  background-color: #333;
+  background-color: #afb4bb;
   height: 100%;
   width: 100%;
   position: relative;
@@ -370,6 +379,21 @@ export default {
   height: 100%;
 }
 
+.popup-import-file__body-two {
+  position: relative;
+}
+
+.warn-invalid-users {
+  position: absolute;
+  bottom: -23px;
+  left: -2px;
+}
+
+.warn-invalid-users__link {
+  color: var(--primary);
+  cursor: pointer;
+}
+
 .popup-import-file__body-one {
   display: flex;
   flex-direction: column;
@@ -385,6 +409,7 @@ export default {
 
 .popup-import-file__body-two .choose-file .file-upload {
   align-items: center;
+  flex-direction: column;
 }
 
 .popup-import-file__body-two .choose-file .file-upload span {
@@ -407,6 +432,10 @@ export default {
   align-items: stretch;
   margin: 0 -12px;
   color: #fff;
+}
+
+.popup-import-file__body-two .check.import {
+  height: 140px;
 }
 
 .popup-import-file__body-two .check-item {
@@ -465,5 +494,9 @@ export default {
 
 .red-color {
   color: red !important;
+}
+
+.mg-t-15 {
+  margin-top: 15px;
 }
 </style>

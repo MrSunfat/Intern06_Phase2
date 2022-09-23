@@ -2,7 +2,7 @@ const nameBtn = {
     Import: 'Nhập khẩu',
     Export: 'Xuất khẩu',
     DownloadExcelTemplate: 'Tải file nhập khẩu mẫu',
-    UploadExcel: 'Up file excel lên',
+    UploadExcel: 'Tải danh sách người dùng lên',
     AddMember: 'Thêm thành viên',
     RemoveMember: 'Loại bỏ thành viên',
     UnChecked: 'Bỏ chọn',

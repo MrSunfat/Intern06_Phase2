@@ -195,4 +195,16 @@ export default {
 .icon-special:hover {
   background-color: var(--icon-s-btn-hover-bg);
 }
+
+.warn-btn.access-btn > .base-btn__text {
+  color: #fff;
+}
+
+.warn-btn.access-btn {
+  border-color: #e61d1d;
+}
+
+.warn-btn.access-btn:hover {
+  background-color: #d81010;
+}
 </style>
