@@ -76,7 +76,7 @@
       />
     </div>
     <PopupAddMember
-      v-show="isShowPopupAddMember"
+      v-if="isShowPopupAddMember"
       @hiddenPopupAddMember="handleHidePopupAddMember"
       @saveMemberForUserGroup="handleSaveMemberForUserGroup"
     />

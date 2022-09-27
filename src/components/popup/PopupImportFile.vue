@@ -24,8 +24,8 @@
       <div class="popup-import-file__body">
         <div class="popup-import-file__body-one" v-show="step === 1">
           <h5 class="title">
-            Mẫu file nhập khẩu các đầy đủ các thông tin sau: họ và tên, chức vụ,
-            đơn vị, phòng ban, ...
+            Mẫu file nhập khẩu phải có đầy đủ các thông tin sau: họ và tên, chức
+            vụ, đơn vị, phòng ban, ...
           </h5>
           <BaseButton
             :nameBtn="buttomEnum.nameBtn.DownloadExcelTemplate"
@@ -74,11 +74,11 @@
           <div class="warn-invalid-users" v-show="invalidUsers?.length">
             Bạn có thể nhấn
             <span
-              class="c-p warn-invalid-users__link"
+              class="c-p warn-invalid-users__link semi-bold"
               @click="handleExportInvalidUsersFile"
               >tại đây</span
             >
-            để xem thông tin người dùng không hợp lệ
+            để xem thông tin người dùng không hợp lệ !
           </div>
         </div>
       </div>
@@ -285,7 +285,7 @@ export default {
   position: relative;
   background-color: #fff;
   width: 800px;
-  height: 500px;
+  height: 520px;
   border-radius: 8px;
 }
 
@@ -385,7 +385,7 @@ export default {
 
 .warn-invalid-users {
   position: absolute;
-  bottom: -23px;
+  bottom: -36px;
   left: -2px;
 }
 

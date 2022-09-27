@@ -7,18 +7,16 @@
           <div class="icon-title-size"></div>
         </div>
       </div>
-      <div class="header__bottom">
-        <BaseInputSearch
-          :placeholderText="placholderText.Search"
-          @twoWayValue="handleFilterColumnOption"
-        />
-      </div>
     </div>
     <div id="base-option__container">
       <div class="widget-container">
         <DxList
           :data-source="userProperties"
           :repaint-changes-only="true"
+          :search-enabled="true"
+          search-mode="contains"
+          search-expr="Name"
+          :searchEditorOptions="{ placeholder: 'Tìm kiếm' }"
           key-expr="Field"
           noDataText="Không có dữ liệu"
         >
@@ -48,7 +46,7 @@
 import DxList, { DxItemDragging } from "devextreme-vue/list";
 import { buttomEnum } from "@/scripts/enum";
 import { placholderText } from "@/scripts/constants";
-import BaseInputSearch from "@/components/base/BaseInputSearch.vue";
+// import BaseInputSearch from "@/components/base/BaseInputSearch.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 import { DxCheckBox } from "devextreme-vue/check-box";
 
@@ -56,7 +54,7 @@ export default {
   components: {
     DxList,
     DxItemDragging,
-    BaseInputSearch,
+    // BaseInputSearch,
     BaseButton,
     DxCheckBox,
   },
@@ -111,6 +109,7 @@ export default {
      */
     handleFilterColumnOption(value) {
       if (value) {
+        console.log(value, this.userProperties);
         this.userProperties = this.userProperties.filter((property) =>
           property.Name.toLowerCase()?.includes(value.toLowerCase())
         );

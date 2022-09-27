@@ -54,12 +54,14 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 .toast-message__icon {
   width: 24px;
   height: 24px;
-  mask: url("../../assets/Icons/ic_sprites.svg") no-repeat -664px -83px;
+  mask: url("../../assets/Icons/ic_sprites.svg") no-repeat -666px -82px;
   background: white;
 }
 

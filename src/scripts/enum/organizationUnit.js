@@ -1600,3 +1600,5 @@ const organizationUnit = {
     GetLastData: true,
     ServerTime: '2022-08-31T14:30:10.240+07:00',
 };
+
+export default organizationUnit;

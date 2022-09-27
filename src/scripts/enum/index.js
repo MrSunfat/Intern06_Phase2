@@ -5,6 +5,7 @@ import currentRecord from './currentRecord';
 import statusTagEnum from './statusTagEnum';
 import userPropertiesEnum from './userPropertiesEnum';
 import positionEnum from './positionEnum';
+import organizationUnit from './organizationUnit';
 
 export {
     userData,
@@ -14,4 +15,5 @@ export {
     statusTagEnum,
     userPropertiesEnum,
     positionEnum,
+    organizationUnit,
 };
